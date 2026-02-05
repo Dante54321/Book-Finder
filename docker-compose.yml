@@ -1,0 +1,15 @@
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: bf_database
+      POSTGRES_USER: author
+      POSTGRES_PASSWORD: Q9vR8k2pLsT4
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
