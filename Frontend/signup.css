@@ -1,1 +1,7 @@
+body {
+    font-family: 'Poppins', sans-serif;
+}
 
+input, button, label, h1, p, a {
+    font-family: 'Poppins', sans-serif;
+}
