@@ -78,7 +78,7 @@ public class Chapter {
                 "chapterId=" + chapterId +
                 ", chapterNumber=" + chapterNumber +
                 ", title='" + title + '\'' +
-                ", book=" + (book != null ? book.getTitle() : null) +
+                ", book=" + (book != null ? book.getBookId() : null) +
                 '}';
     }
 }

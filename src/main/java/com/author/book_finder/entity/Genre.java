@@ -1,6 +1,8 @@
 package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,7 +20,7 @@ public class Genre {
     // One-to-Many relationship
     //-------------------------
     @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Book> books;
+    private List<Book> books = new ArrayList<>();
 
     // Constructors
     public Genre() {}

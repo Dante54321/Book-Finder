@@ -2,6 +2,7 @@ package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,10 +44,13 @@ public class Book {
     // One-to-Many relationships
     //---------------------------
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Chapter> chapters;
+    private List<Chapter> chapters = new ArrayList<>();
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookHashtag> bookHashtags = new ArrayList<>();
 
 
     // Constructors
@@ -133,6 +137,13 @@ public class Book {
         this.chapters = chapters;
     }
 
+    public List<BookHashtag> getBookHashtags() {
+        return bookHashtags;
+    }
+    public void setBookHashtags(List<BookHashtag> bookHashtags) {
+        this.bookHashtags = bookHashtags;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -140,9 +151,6 @@ public class Book {
                 ", volumeNumber=" + volumeNumber +
                 ", title='" + title + '\'' +
                 ", publishDate=" + publishDate +
-                ", user=" + (user != null ? user.getUsername() : null) +
-                ", series=" + (series != null ? series.getSeriesName() : null) +
-                ", genre=" + (genre != null ? genre.getGenreName() : null) +
                 '}';
     }
 

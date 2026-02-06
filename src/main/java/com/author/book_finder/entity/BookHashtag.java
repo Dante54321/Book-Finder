@@ -55,8 +55,8 @@ public class BookHashtag {
     public String toString() {
         return "BookHashtag{" +
                 "id=" + bookHashtagId +
-                ", book=" + (book != null ? book.getTitle() : null) +
-                ", hashtag=" + (hashtag != null ? hashtag.getHashtag() : null) +
+                ", book=" + (book != null ? book.getBookId() : null) +
+                ", hashtag=" + (hashtag != null ? hashtag.getHashtagId() : null) +
                 '}';
     }
 }
