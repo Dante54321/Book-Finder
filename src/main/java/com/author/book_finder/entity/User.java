@@ -3,7 +3,9 @@ package com.author.book_finder.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name= "users")
@@ -29,7 +31,7 @@ public class User {
     private String lastName;
 
     @Column(nullable = false)
-    private LocalDate joinDate;
+    private LocalDate joinDate = LocalDate.now();
 
     @Column(length = 1000)
     private String bio;
@@ -55,7 +57,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
 
-    private List<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
     // Constructors
     public User() {}
@@ -156,10 +158,10 @@ public class User {
         this.reviews = reviews;
     }
 
-    public List<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
-    public void setRoles(List<Role> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 

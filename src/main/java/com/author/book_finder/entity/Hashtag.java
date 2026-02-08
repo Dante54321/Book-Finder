@@ -2,8 +2,8 @@ package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "hashtags")
@@ -17,10 +17,10 @@ public class Hashtag {
     private String hashtag;
 
     //--------------------------
-    // Many-to-Many relationship
+    // One-to-Many relationship
     //--------------------------
     @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookHashtag> bookHashtags = new ArrayList<>();
+    private Set<BookHashtag> bookHashtags = new HashSet<>();
 
     // Constructors
     public Hashtag() {}
@@ -44,10 +44,10 @@ public class Hashtag {
         this.hashtag = hashtag;
     }
 
-    public List<BookHashtag> getBookHashtags() {
+    public Set<BookHashtag> getBookHashtags() {
         return bookHashtags;
     }
-    public void setBookHashtags(List<BookHashtag> bookHashtags) {
+    public void setBookHashtags(Set<BookHashtag> bookHashtags) {
         this.bookHashtags = bookHashtags;
     }
 

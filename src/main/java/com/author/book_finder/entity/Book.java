@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "books")
@@ -36,9 +37,17 @@ public class Book {
     @JoinColumn(name = "series_id")
     private Series series;
 
-    @ManyToOne
-    @JoinColumn(name = "genre_id")
-    private Genre genre;
+    //---------------------------
+    // Many-to-Many relationships
+    //---------------------------
+    @ManyToMany
+    @JoinTable(
+            name = "book_genres",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+
+    )
+    private Set<Genre> genres;
 
     //---------------------------
     // One-to-Many relationships
@@ -56,14 +65,14 @@ public class Book {
     // Constructors
     public Book() {}
 
-    public Book(int volumeNumber, String title, String summary, LocalDate publishDate, User user, Series series, Genre genre){
+    public Book(int volumeNumber, String title, String summary, LocalDate publishDate, User user, Series series, Set<Genre> genres){
         this.volumeNumber = volumeNumber;
         this.title = title;
         this.summary = summary;
         this.publishDate = publishDate;
         this.user = user;
         this.series = series;
-        this.genre = genre;
+        this.genres = genres;
     }
 
     // Getters and Setters
@@ -116,11 +125,11 @@ public class Book {
         this.series = series;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public Set<Genre> getGenres() {
+        return genres;
     }
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setGenre(Set<Genre> genres) {
+        this.genres = genres;
     }
 
     public List<Review> getReviews() {

@@ -16,8 +16,9 @@ public class Chapter {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 2000)
-    private String contentUrl;
+    // Store the S3 object key
+    @Column(nullable = false, length = 512)
+    private String s3Key;
 
     //-------------------------
     // Many-to-One relationship
@@ -29,10 +30,11 @@ public class Chapter {
     // Constructors
     public Chapter() {}
 
-    public Chapter(int chapterNumber, String title, String contentUrl, Book book) {
+    public Chapter(int chapterNumber, String title, String s3Key, Book book) {
         this.chapterNumber = chapterNumber;
         this.title = title;
-        this.contentUrl = contentUrl;
+        this.s3Key = s3Key;
+
         this.book = book;
     }
 
@@ -59,10 +61,10 @@ public class Chapter {
     }
 
     public String getContentUrl() {
-        return contentUrl;
+        return s3Key;
     }
-    public void setContentUrl(String contentUrl) {
-        this.contentUrl = contentUrl;
+    public void setContentUrl(String s3Key) {
+            this.s3Key = s3Key;
     }
 
     public Book getBook() {
