@@ -1,40 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Book-Finder Sign Up</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./auth.css">
 </head>
+
 <body>
-<div class="signup-page">
-    <div class="signup-form">
-        <h1>Sign Up</h1>
-        <form id="signupForm">
-            <label>Username</label><br>
-            <input type="text" placeholder="Enter your Username" required>
-            <br><br>
-            <label>Email address</label><br>
-            <input type="email" placeholder="Enter your email" required>
-            <br><br>
-            <label>Password</label><br>
-            <input type="password" placeholder="Password" required>
-            <br><br>
-            <input type="checkbox">
-            <label>I agree to the terms & policy.</label>
-            <br><br>
-            <button type="submit">Signup</button>
-        </form>
-        <hr>
-        <p>Or</p>
-        <p>
-            Have an account?
-            <a href="login.html">Sign In</a>
-        </p>
+    <div class="page-wrapper">
+        <div class="form-container">
+            <h1>Sign Up</h1>
+            <form id="signupForm">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Enter your Username" required>
+                <div class="label-row"></div>
+                <label>Email address</label>
+                <input type="email" placeholder="Enter your email" required>
+
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Password" required>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms">
+                    <label for="terms">I agree to the terms & policy.</label>
+                </div>
+
+                <button type="submit">Signup</button>
+            </form>
+            <hr>
+            <div class="form-footer">
+                <p>Or</p>
+                <p>Have an account? <a href="login.html" class="auth-link-bold">Sign In</a></p>
+            </div>
+        </div>
+        <div class="image-container">
+            <img src="./svg_files/bookfinder logo.svg" alt="Book Finder" width="400">
+        </div>
     </div>
-    <div class="signup-image">
-        <img src="./bookfinder logo.svg" alt="Book Finder" width="400">
+
+    <div class="bottom-decor-bar">
+        <div class="decor-segment seg-1"></div>
+        <div class="decor-segment seg-2"></div>
+        <div class="decor-segment seg-3"></div>
+        <div class="decor-segment seg-4"></div>
     </div>
-</div>
 </body>
+
 </html>
