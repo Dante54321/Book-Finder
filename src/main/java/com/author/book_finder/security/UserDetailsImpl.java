@@ -12,14 +12,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
-    private Long  id;
+    private Long  userId;
     private String username;
     private String email;
     private String password;
     private Set<GrantedAuthority> authorities;
 
     public UserDetailsImpl(User user) {
-        this.id = user.getUserId();
+        this.userId = user.getUserId();
         this.username = user.getUsername();
         this.email = user.getEmail();
         this.password = user.getPassword();
@@ -28,9 +28,8 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toSet());
     }
 
-
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
     public String getEmail() {
