@@ -24,20 +24,20 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String firstName;
 
-    @Column(nullable = false)
+    @Column
     private String lastName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDate joinDate = LocalDate.now();
 
-    @Column(length = 1000)
+    @Column(length = 1600)
     private String bio;
 
     @Column(nullable = false)
-    private Boolean isBanned;
+    private Boolean isBanned = false;
 
     // Relationships
 
@@ -62,15 +62,10 @@ public class User {
     // Constructors
     public User() {}
 
-    public User(String username, String email, String password, String firstName, String lastName, LocalDate joinDate, String bio, Boolean isBanned) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.joinDate = joinDate;
-        this.bio = bio;
-        this.isBanned = isBanned;
     }
 
     // Getters and Setters
@@ -171,6 +166,8 @@ public class User {
                 "userId=" + userId +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", bio='" + bio + '\'' +
                 ", joinDate=" + joinDate +
                 ", isBanned=" + isBanned +
