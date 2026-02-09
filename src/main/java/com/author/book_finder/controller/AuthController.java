@@ -7,11 +7,12 @@ import com.author.book_finder.repository.RoleRepository;
 import com.author.book_finder.repository.UserRepository;
 import com.author.book_finder.security.JwtUtils;
 import com.author.book_finder.security.UserDetailsImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,22 +43,24 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String registerUser(@RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<MessageResponse> registerUser(@RequestBody SignupRequest signUpRequest) {
         if (userRepository.findByUsername(signUpRequest.getUsername()).isPresent()) {
-            return "Error: Username is already taken!";
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            return "Error: Email is already in use!";
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user with encoded password
         User user = new User();
         user.setUsername(signUpRequest.getUsername());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
-        // Assign default ROLE_USER
         Role userRole = roleRepository.findByRoleName("ROLE_USER")
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_USER")));
         Set<Role> roles = new HashSet<>();
@@ -66,11 +69,13 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return "User registered successfully!";
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new MessageResponse("User registered successfully!"));
     }
 
     @PostMapping("/signin")
-    public JwtResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
@@ -86,10 +91,10 @@ public class AuthController {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toSet());
 
-        return new JwtResponse(jwt, userDetails.getUserId(), userDetails.getUsername(), roles);
-        /*  return ResponseEntity.ok(jwtResponse);
-            Optional wrapper to get HTTP status (e.g, 400 BAD_REQUEST)
-        */
+        return ResponseEntity.ok(
+                new JwtResponse(jwt, userDetails.getUserId(), userDetails.getUsername(), roles)
+        );
     }
+
 }
 
