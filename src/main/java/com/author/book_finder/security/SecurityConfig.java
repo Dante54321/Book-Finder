@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/api/auth/**").permitAll() // allow signup/signin
+                                .requestMatchers("/api/public/**").permitAll() // public test endpoint
                                 .anyRequest().authenticated()               // protect other routes
                 )
 
