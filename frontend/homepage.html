@@ -1,0 +1,227 @@
+<!-- homepage.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookFinder | Home</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./auth.css">
+</head>
+
+<body class="home-body">
+  <!-- Top Nav -->
+  <header class="home-nav">
+    <div class="nav-left">
+      <img class="nav-logo" src="./svg_files/bookfinder logo.svg" alt="BookFinder Logo">
+      <span class="nav-brand">BookFinder</span>
+    </div>
+
+    <div class="nav-search">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="Search Books" />
+
+    <button class="filter-btn" type="button" aria-label="Filter">
+      <!-- sliders icon -->
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M4 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 7a2 2 0 1 0 4 0a2 2 0 0 0-4 0Z" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 17a2 2 0 1 0 4 0a2 2 0 0 0-4 0Z" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+   <!-- sliders icon -->
+    <div class="nav-right">
+      <a class="nav-btn nav-btn-solid" href="login.html">Log in</a>
+      <a class="nav-btn nav-btn-solid" href="signup.html">Sign up</a>
+    </div>
+  </header>
+
+  
+  <main class="home-hero">
+    <section class="hero-left">
+      <h1 class="hero-title">
+        Looking For a Book?<br>
+        Find it Here.
+      </h1>
+
+      <p class="hero-subtitle">
+        Join our community of thousands of authors self publishing<br>
+        their books for free.
+      </p>
+
+      <a class="hero-cta" href="#">
+        <span>Explore Now</span>
+        <span class="cta-arrow">→</span>
+      </a>
+    </section>
+
+    <section class="hero-right" aria-label="Featured books">
+      <!-- Replace these src paths with your real images -->
+      <div class="book-card book-1">
+        <img src="./images/book1.jpg" alt="Book cover 1">
+      </div>
+
+      <div class="book-card book-2">
+        <img src="./images/book2.jpg" alt="Book cover 2">
+      </div>
+
+      <div class="book-card book-3">
+        <img src="./images/book3.jpg" alt="Book cover 3">
+      </div>
+
+      <div class="book-card book-4">
+        <img src="./images/book4.jpg" alt="Book cover 4">
+      </div>
+
+      <div class="book-card book-5">
+        <img src="./images/book5.jpg" alt="Book cover 5">
+      </div>
+
+      <div class="book-card book-6">
+        <img src="./images/book6.jpg" alt="Book cover 6">
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom color bar (same as auth pages) -->
+  <div class="bottom-decor-bar">
+    <div class="decor-segment seg-1"></div>
+    <div class="decor-segment seg-2"></div>
+    <div class="decor-segment seg-3"></div>
+    <div class="decor-segment seg-4"></div>
+  </div>
+
+     <!-- PART 2: Popular + Genres -->
+  <section class="home-section">
+    <div class="section-head">
+      <h2 class="section-title">Popular Now <span class="arrow">→</span></h2>
+    </div>
+
+    <div class="scroll-lane popular-track" aria-label="Popular books">
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/pride.jpg" alt="Pride &amp; Prejudice cover"></div>
+        <p class="tile-title">PRIDE &amp; PREJUDICE</p>
+        <p class="tile-author">JANE AUSTEN</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/nightocean.jpg" alt="The Night Ocean cover"></div>
+        <p class="tile-title">THE NIGHT OCEAN</p>
+        <p class="tile-author">PAUL LA FARGE</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/moonstars.jpg" alt="The Moon and Stars cover"></div>
+        <p class="tile-title">THE MOON AND STARS</p>
+        <p class="tile-author">JENNA WARREN</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/james.jpg" alt="James and the Giant Peach cover"></div>
+        <p class="tile-title">JAMES AND THE GIANT PEACH</p>
+        <p class="tile-author">ROALD DAHL</p>
+      </article>
+
+      <!-- MORE BOOKS so it scrolls -->
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book5.jpg" alt="Book cover"></div>
+        <p class="tile-title">CITY OF ORANGE</p>
+        <p class="tile-author">DAVID YOON</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book6.jpg" alt="Book cover"></div>
+        <p class="tile-title">BEAUTIFUL</p>
+        <p class="tile-author">AUTHOR NAME</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book1.jpg" alt="Book cover"></div>
+        <p class="tile-title">DUNE</p>
+        <p class="tile-author">FRANK HERBERT</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book2.jpg" alt="Book cover"></div>
+        <p class="tile-title">THE WOODS</p>
+        <p class="tile-author">AUTHOR NAME</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book3.jpg" alt="Book cover"></div>
+        <p class="tile-title">THE NIGHT</p>
+        <p class="tile-author">AUTHOR NAME</p>
+      </article>
+
+      <article class="book-tile">
+        <div class="tile-cover"><img src="./images/book4.jpg" alt="Book cover"></div>
+        <p class="tile-title">STARS ABOVE</p>
+        <p class="tile-author">AUTHOR NAME</p>
+      </article>
+    </div>
+
+    <div class="dots">
+      <span class="dot"></span>
+      <span class="dot active"></span>
+      <span class="dot"></span>
+    </div>
+  </section>
+
+  <section class="home-section">
+    <div class="section-head">
+      <h2 class="section-title">Browse Genres <span class="arrow">→</span></h2>
+    </div>
+
+    <div class="scroll-lane genre-row" aria-label="Genres">
+      <a class="genre-card horror" href="#">
+        <div class="genre-text"><h3>Horror</h3><p>8.0k Books</p></div>
+      </a>
+
+      <a class="genre-card fantasy" href="#">
+        <div class="genre-text"><h3>Fantasy</h3><p>10.2k Books</p></div>
+      </a>
+
+      <a class="genre-card romance" href="#">
+        <div class="genre-text"><h3>Romance</h3><p>7.8k Books</p></div>
+        <div class="genre-icon" aria-hidden="true">♡</div>
+      </a>
+
+      <a class="genre-card scifi" href="#">
+        <div class="genre-text"><h3>Sci-Fi</h3><p>6.4k Books</p></div>
+      </a>
+
+      <!-- MORE GENRES so it scrolls -->
+      <a class="genre-card mystery" href="#">
+        <div class="genre-text"><h3>Mystery</h3><p>5.1k Books</p></div>
+      </a>
+
+      <a class="genre-card thriller" href="#">
+        <div class="genre-text"><h3>Thriller</h3><p>4.6k Books</p></div>
+      </a>
+
+      <a class="genre-card nonfiction" href="#">
+        <div class="genre-text"><h3>Nonfiction</h3><p>9.3k Books</p></div>
+      </a>
+
+      <a class="genre-card poetry" href="#">
+        <div class="genre-text"><h3>Poetry</h3><p>2.2k Books</p></div>
+      </a>
+    </div>
+
+    <div class="dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </section>
+
+
+</body>
+</html>
+
