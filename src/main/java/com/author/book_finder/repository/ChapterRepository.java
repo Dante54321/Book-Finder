@@ -12,6 +12,7 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     List<Chapter> findByBookOrderByChapterNumberAsc(Book book);
 
+    List<Chapter> findByBookBookIdOrderByChapterNumberAsc(Long bookId);
 }
 
 

@@ -20,6 +20,12 @@ public class Chapter {
     @Column(nullable = false, length = 512)
     private String s3Key;
 
+    @Column(nullable = false)
+    private boolean isPreview; // Preview: first chapter is free login for full access
+
+    @Column(nullable = false)
+    private String contentType; // Content type for upload "MARKDOWN" or "HTML"
+
     //-------------------------
     // Many-to-One relationship
     //-------------------------
@@ -72,6 +78,25 @@ public class Chapter {
     }
     public void setBook(Book book) {
         this.book = book;
+    }
+
+    public String getS3Key() {
+        return s3Key;
+    }
+    public void setS3Key(String s3Key) {
+        this.s3Key = s3Key;
+    }
+    public boolean isPreview() {
+        return isPreview;
+    }
+    public void setIsPreview(boolean preview) {
+        isPreview = preview;
+    }
+    public String getContentType() {
+        return contentType;
+    }
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     @Override
