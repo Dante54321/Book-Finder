@@ -86,12 +86,14 @@ public class Chapter {
     public void setS3Key(String s3Key) {
         this.s3Key = s3Key;
     }
+
     public boolean isPreview() {
         return isPreview;
     }
     public void setIsPreview(boolean preview) {
         isPreview = preview;
     }
+
     public String getContentType() {
         return contentType;
     }
