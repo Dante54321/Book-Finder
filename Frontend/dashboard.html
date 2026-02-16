@@ -1,13 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Finder Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./auth.css">
-</head>
-
+    <link rel="stylesheet" href="dashboard.css"> </head>
 <body>
-    <h1>Dashboard</h1>
-    <p> welcome to the dashboard</p>
+
+    <nav class="navbar">
+       <div class="logo">
+            <img src="./svg_files/bookfinder logo.svg" alt="Book Finder Logo" class="logo-icon"> BookFinder
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Home</a>
+            <a href="#">My books</a>
+            <a href="#">Browse</a>
+            <a href="#">Community</a>
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search for Books">
+            </div>
+            <button class="btn-write">Write</button>
+            <div class="profile-icon"></div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <section class="shelf-container">
+            <h2>Continue Reading</h2>
+            <div class="shelf-card">
+                <div class="shelf-header">
+                    <h3>Currently Reading Books (5)</h3>
+                    <button class="btn-red">View All Books ></button>
+                </div>
+                <div class="book-list">
+                    <div class="book-item"><div class="cover"></div><p>Book 1</p><span>By Author 1</span></div>
+                    <div class="book-item"><div class="cover"></div><p>Book 2</p><span>By Author 2</span></div>
+                    <div class="book-item"><div class="cover"></div><p>Book 3</p><span>By Author 3</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="shelf-container">
+            <h2>Your Published Books</h2>
+            <div class="shelf-card">
+                <div class="shelf-header">
+                    <h3>Published Books</h3>
+                    <button class="btn-red">View All Books ></button>
+                </div>
+                <div class="book-list">
+                    <div class="book-item"><div class="cover"></div><p>The Tale of Dragons</p><span>35 parts</span></div>
+                    <div class="book-item"><div class="cover"></div><p>The Tale of Serpents</p><span>24 parts</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="discovery-section">
+            <h2>Discover a New Book to Read</h2>
+            <div class="discovery-grid">
+                <div class="disc-card red"><h3>By the Community</h3><p>recommendations based on favorites</p></div>
+                <div class="disc-card dark"><h3>By books</h3><p>recommendations based on choices</p></div>
+                <div class="disc-card pink"><h3>By Genre</h3><p>recommendations based on genres</p></div>
+            </div>
+        </section>
+    </div>
 
     <script src="dashboard.js"></script>
 </body>
+</html>
