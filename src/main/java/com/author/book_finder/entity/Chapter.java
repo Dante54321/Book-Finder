@@ -21,7 +21,7 @@ public class Chapter {
     private String s3Key;
 
     @Column(nullable = false)
-    private boolean isPreview; // Preview: first chapter is free login for full access
+    private boolean isPreview; // Preview: first chapter is free, login for full access
 
     @Column(nullable = false)
     private String contentType; // Content type for upload "MARKDOWN" or "HTML"
@@ -29,18 +29,19 @@ public class Chapter {
     //-------------------------
     // Many-to-One relationship
     //-------------------------
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
     // Constructors
     public Chapter() {}
 
-    public Chapter(int chapterNumber, String title, String s3Key, Book book) {
+    public Chapter(int chapterNumber, String title, String s3Key, String contentType, boolean isPreview, Book book) {
         this.chapterNumber = chapterNumber;
         this.title = title;
         this.s3Key = s3Key;
-
+        this.contentType = contentType;
+        this.isPreview = isPreview;
         this.book = book;
     }
 
@@ -66,20 +67,6 @@ public class Chapter {
         this.title = title;
     }
 
-    public String getContentUrl() {
-        return s3Key;
-    }
-    public void setContentUrl(String s3Key) {
-            this.s3Key = s3Key;
-    }
-
-    public Book getBook() {
-        return book;
-    }
-    public void setBook(Book book) {
-        this.book = book;
-    }
-
     public String getS3Key() {
         return s3Key;
     }
@@ -101,13 +88,19 @@ public class Chapter {
         this.contentType = contentType;
     }
 
+    public Book getBook() {
+        return book;
+    }
+    public void setBook(Book book) {
+        this.book = book;
+    }
+
     @Override
     public String toString() {
         return "Chapter{" +
                 "chapterId=" + chapterId +
                 ", chapterNumber=" + chapterNumber +
                 ", title='" + title + '\'' +
-                ", book=" + (book != null ? book.getBookId() : null) +
                 '}';
     }
 }
