@@ -2,17 +2,21 @@ package com.author.book_finder.dto;
 
 public class ChapterResponseDTO {
     private Long chapterId;
-    private String title;
     private int chapterNumber;
+    private String title;
     private boolean isPreview;
     private String contentType;
+    private String previewUrl;
+    private String fullUrl;
 
-    public ChapterResponseDTO(Long chapterId, String title, int chapterNumber, boolean isPreview, String contentType) {
+    public ChapterResponseDTO(Long chapterId, int chapterNumber, String title, boolean isPreview, String contentType, String previewUrl, String fullUrl) {
         this.chapterId = chapterId;
-        this.title = title;
         this.chapterNumber = chapterNumber;
+        this.title = title;
         this.isPreview = isPreview;
         this.contentType = contentType;
+        this.previewUrl = previewUrl;
+        this.fullUrl = fullUrl;
     }
 
     public Long getChapterId() {
@@ -53,5 +57,21 @@ public class ChapterResponseDTO {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
+    }
+
+    public String getFullUrl() {
+        return fullUrl;
+    }
+
+    public void setFullUrl(String fullUrl) {
+        this.fullUrl = fullUrl;
     }
 }
