@@ -4,6 +4,7 @@ import com.author.book_finder.dto.ChapterResponseDTO;
 import com.author.book_finder.dto.ChapterUploadRequestDTO;
 import com.author.book_finder.dto.ChapterUploadResponseDTO;
 import com.author.book_finder.service.ChapterService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +38,7 @@ public class ChapterController {
         request.setIsPreview(isPreview);
 
         ChapterUploadResponseDTO response = chapterService.uploadChapter(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/book/{bookId}")

@@ -1,6 +1,6 @@
 package com.author.book_finder.dto;
 
-public class SignupRequest {
+public class SignupRequestDTO {
     private String username;
     private String email;
     private String password;

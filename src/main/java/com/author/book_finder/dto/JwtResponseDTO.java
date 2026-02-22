@@ -2,7 +2,7 @@ package com.author.book_finder.dto;
 
 import java.util.Set;
 
-public class JwtResponse {
+public class JwtResponseDTO {
     private String token;
     private String type =  "Bearer";
     private Long id;
@@ -10,7 +10,7 @@ public class JwtResponse {
     private Set<String> roles;
 
 
-    public JwtResponse(String token, Long id, String username, Set<String> roles) {
+    public JwtResponseDTO(String token, Long id, String username, Set<String> roles) {
         this.token = token;
         this.id = id;
         this.username = username;

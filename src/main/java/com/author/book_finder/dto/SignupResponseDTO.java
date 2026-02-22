@@ -1,10 +1,10 @@
 package com.author.book_finder.dto;
 
-public class MessageResponse {
+public class SignupResponseDTO {
 
     private String message;
 
-    public MessageResponse(String message) {
+    public SignupResponseDTO(String message) {
         this.message = message;
     }
 
