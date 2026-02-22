@@ -101,8 +101,8 @@ public class ChapterService {
                 ch.getChapterNumber(),
                 ch.getTitle(),
                 ch.isPreview(),
-                ch.isPreview() ? s3Service.generatePresignedUrl(ch.getS3Key(), 15) : null,
                 ch.getContentType(),
+                null,
                 fullUrl
         );
     }
