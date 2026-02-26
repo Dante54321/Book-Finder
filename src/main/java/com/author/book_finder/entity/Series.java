@@ -2,7 +2,9 @@ package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -33,7 +35,8 @@ public class Series {
     // One-to-many relationship to Book
     //----------------------------------
     @OneToMany(mappedBy ="series", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Book> books = new HashSet<>();
+    @OrderBy("volumeNumber ASC")
+    private List<Book> books = new ArrayList<>();
 
     // Constructors
     public Series() {}
@@ -81,10 +84,10 @@ public class Series {
         this.user = user;
     }
 
-    public Set<Book> getBooks() {
+    public List<Book> getBooks() {
         return books;
     }
-    public void setBooks(Set<Book> books) {
+    public void setBooks(List<Book> books) {
         this.books = books;
     }
 

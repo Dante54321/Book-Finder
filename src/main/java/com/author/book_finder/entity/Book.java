@@ -3,19 +3,24 @@ package com.author.book_finder.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "books")
+@Table(name = "books",
+    uniqueConstraints = @UniqueConstraint(
+            columnNames = {"series_id","volume_number"}
+    )
+)
 
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookId;
 
-    @Column(nullable = false)
-    private int volumeNumber;
+    @Column
+    private Integer volumeNumber;
 
     @Column(nullable = false)
     private String title;
@@ -29,11 +34,11 @@ public class Book {
     //---------------------------
     // Many-to-One relationships
     //---------------------------
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private Series series;
 
@@ -47,25 +52,26 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
 
     )
-    private Set<Genre> genres;
+    private Set<Genre> genres = new HashSet<>();
 
     //---------------------------
     // One-to-Many relationships
     //---------------------------
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();
+    private Set<Review> reviews = new HashSet<>();
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("chapterNumber ASC")
     private List<Chapter> chapters = new ArrayList<>();
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookHashtag> bookHashtags = new ArrayList<>();
+    private Set<BookHashtag> bookHashtags = new HashSet<>();
 
 
     // Constructors
     public Book() {}
 
-    public Book(int volumeNumber, String title, String summary, LocalDate publishDate, User user, Series series, Set<Genre> genres){
+    public Book(Integer volumeNumber, String title, String summary, LocalDate publishDate, User user, Series series, Set<Genre> genres){
         this.volumeNumber = volumeNumber;
         this.title = title;
         this.summary = summary;
@@ -73,6 +79,17 @@ public class Book {
         this.user = user;
         this.series = series;
         this.genres = genres;
+    }
+
+    // ADD HASHTAG HELPER METHOD
+    public void addHashtag(Hashtag hashtag) {
+        BookHashtag bookHashtag = new BookHashtag(this, hashtag);
+        bookHashtags.add(bookHashtag);
+    }
+
+    // REMOVE HASHTAG HELPER METHOD
+    public void removeHashtag(BookHashtag bookHashtag) {
+        bookHashtags.remove(bookHashtag);
     }
 
     // Getters and Setters
@@ -83,10 +100,10 @@ public class Book {
         this.bookId = bookId;
     }
 
-    public int getVolumeNumber() {
+    public Integer getVolumeNumber() {
         return volumeNumber;
     }
-    public void setVolumeNumber(int volumeNumber) {
+    public void setVolumeNumber(Integer volumeNumber) {
         this.volumeNumber = volumeNumber;
     }
 
@@ -128,14 +145,14 @@ public class Book {
     public Set<Genre> getGenres() {
         return genres;
     }
-    public void setGenre(Set<Genre> genres) {
+    public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
 
-    public List<Review> getReviews() {
+    public Set<Review> getReviews() {
         return reviews;
     }
-    public void setReviews(List<Review> reviews) {
+    public void setReviews(Set<Review> reviews) {
         this.reviews = reviews;
     }
 
@@ -146,10 +163,10 @@ public class Book {
         this.chapters = chapters;
     }
 
-    public List<BookHashtag> getBookHashtags() {
+    public Set<BookHashtag> getBookHashtags() {
         return bookHashtags;
     }
-    public void setBookHashtags(List<BookHashtag> bookHashtags) {
+    public void setBookHashtags(Set<BookHashtag> bookHashtags) {
         this.bookHashtags = bookHashtags;
     }
 

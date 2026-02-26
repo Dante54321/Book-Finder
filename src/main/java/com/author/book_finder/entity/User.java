@@ -37,7 +37,7 @@ public class User {
     private String bio;
 
     @Column(nullable = false)
-    private Boolean isBanned = false;
+    private boolean isBanned = false;
 
     // Relationships
 

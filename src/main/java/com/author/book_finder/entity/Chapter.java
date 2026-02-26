@@ -3,7 +3,9 @@ package com.author.book_finder.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "chapters")
+@Table(name = "chapters", uniqueConstraints = @UniqueConstraint(columnNames = {"book_id", "chapter_number"}
+    )
+)
 
 public class Chapter {
     @Id
@@ -23,6 +25,7 @@ public class Chapter {
     @Column(nullable = false)
     private boolean isPreview; // Preview: first chapter is free, login for full access
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private String contentType; // Content type for upload "MARKDOWN" or "HTML"
 
@@ -77,7 +80,7 @@ public class Chapter {
     public boolean isPreview() {
         return isPreview;
     }
-    public void setIsPreview(boolean preview) {
+    public void setPreview(boolean preview) {
         isPreview = preview;
     }
 

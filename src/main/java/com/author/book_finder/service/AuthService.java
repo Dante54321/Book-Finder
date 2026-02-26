@@ -7,12 +7,14 @@ import com.author.book_finder.repository.RoleRepository;
 import com.author.book_finder.repository.UserRepository;
 import com.author.book_finder.security.JwtUtils;
 import com.author.book_finder.security.UserDetailsImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,12 +44,12 @@ public class AuthService {
     public SignupResponseDTO registerUser(SignupRequestDTO signupRequestDTO) {
         // Check for existing username
         if (userRepository.findByUsername(signupRequestDTO.getUsername()).isPresent()) {
-            return new SignupResponseDTO("Error: Username is already taken!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Username is already taken!");
         }
 
         // Check for existing email
         if (userRepository.findByEmail(signupRequestDTO.getEmail()).isPresent()) {
-            return new SignupResponseDTO("Error: Email is already in use!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email is already taken!");
         }
 
         // Create new user

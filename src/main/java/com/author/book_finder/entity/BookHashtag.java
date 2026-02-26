@@ -3,7 +3,10 @@ package com.author.book_finder.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "book_hashtags")
+@Table(name = "book_hashtags",
+    uniqueConstraints =  @UniqueConstraint(columnNames = {"book_id", "hashtag_id"}
+    )
+)
 
 public class BookHashtag {
     @Id
