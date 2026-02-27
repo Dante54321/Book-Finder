@@ -1,5 +1,7 @@
 package com.author.book_finder.service;
 
+import com.author.book_finder.book.exception.BookAccessDeniedException;
+import com.author.book_finder.book.exception.BookNotFoundException;
 import com.author.book_finder.dto.BookCreateRequestDTO;
 import com.author.book_finder.dto.BookDetailsDTO;
 import com.author.book_finder.dto.BookResponseDTO;
@@ -79,7 +81,7 @@ public class BookService {
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+                        new BookNotFoundException(bookId));
 
         return mapToDetailsDTO(book);
     }
@@ -89,7 +91,7 @@ public class BookService {
     public BookResponseDTO updateBook(Long bookId, BookCreateRequestDTO dto) {
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(bookId));
 
         validateOwnership(book);
 
@@ -112,7 +114,7 @@ public class BookService {
     public void deleteBook(Long bookId) {
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+                .orElseThrow(() -> new BookNotFoundException(bookId));
 
         validateOwnership(book);
 
@@ -184,7 +186,7 @@ public class BookService {
         boolean isAdmin = securityUtil.isAdmin();
 
         if (!book.getUser().getUserId().equals(currentUserId) && !isAdmin) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to perform this action");
+            throw new BookAccessDeniedException();
         }
     }
 
