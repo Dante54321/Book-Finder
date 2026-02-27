@@ -3,14 +3,12 @@ package com.author.book_finder.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "series")
-
 public class Series {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long seriesId;
@@ -24,16 +22,16 @@ public class Series {
     @Column(nullable = false)
     private LocalDate publishDate;
 
-    //---------------------------------
-    // Many-to-one relationship to User
-    //---------------------------------
-    @ManyToOne
+    // -----------------------------
+    // Many-to-One relationship
+    // -----------------------------
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    //----------------------------------
-    // One-to-many relationship to Book
-    //----------------------------------
+    // -----------------------------
+    // One-to-Many relationship
+    // -----------------------------
     @OneToMany(mappedBy ="series", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("volumeNumber ASC")
     private List<Book> books = new ArrayList<>();
@@ -46,6 +44,35 @@ public class Series {
         this.description = description;
         this.publishDate = publishDate;
         this.user = user;
+    }
+
+    // -----------------------------
+    // Helper Methods
+    // -----------------------------
+    public void addBook(Book book) {
+        books.add(book);
+        book.setSeries(this);
+    }
+
+    public void removeBook(Book book) {
+        books.remove(book);
+        book.setSeries(null);
+    }
+
+    // -----------------------------
+    // Equals & HashCode
+    // -----------------------------
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Series series = (Series) o;
+        return seriesId != null && seriesId.equals(series.seriesId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     // Getters and Setters

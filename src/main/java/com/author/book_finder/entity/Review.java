@@ -1,15 +1,24 @@
 package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @Entity
-@Table(name = "reviews")
-
+@Table(
+        name = "reviews",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "book_id"}
+        )
+)
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
+    @Min(1)
+    @Max(5)
     @Column(nullable = false)
     private int rating;
 
@@ -19,15 +28,15 @@ public class Review {
     //--------------------------
     // Many-to-One relationships
     //--------------------------
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    // Constructors
     public Review() {}
 
     public Review(int rating, String comment, User user, Book book) {
@@ -36,6 +45,22 @@ public class Review {
         this.user = user;
         this.book = book;
     }
+
+    // Equals & HashCode
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Review review = (Review) o;
+        return reviewId != null && reviewId.equals(review.reviewId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
 
     // Getters and Setters
     public Long getReviewId() {

@@ -2,19 +2,17 @@ package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
-@Table(name = "books",
-    uniqueConstraints = @UniqueConstraint(
-            columnNames = {"series_id","volume_number"}
-    )
+@Table(
+        name = "books",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"series_id", "volume_number"}
+        )
 )
-
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookId;
@@ -31,9 +29,10 @@ public class Book {
     @Column(nullable = false)
     private LocalDate publishDate;
 
-    //---------------------------
+    // ---------------------------
     // Many-to-One relationships
-    //---------------------------
+    // ---------------------------
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -42,21 +41,22 @@ public class Book {
     @JoinColumn(name = "series_id")
     private Series series;
 
-    //---------------------------
+    // ---------------------------
     // Many-to-Many relationships
-    //---------------------------
-    @ManyToMany
+    // ---------------------------
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "book_genres",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
-
     )
     private Set<Genre> genres = new HashSet<>();
 
-    //---------------------------
+    // ---------------------------
     // One-to-Many relationships
-    //---------------------------
+    // ---------------------------
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews = new HashSet<>();
 
@@ -67,35 +67,105 @@ public class Book {
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BookHashtag> bookHashtags = new HashSet<>();
 
-
+    // ---------------------------
     // Constructors
+    // ---------------------------
+
     public Book() {}
 
-    public Book(Integer volumeNumber, String title, String summary, LocalDate publishDate, User user, Series series, Set<Genre> genres){
+    public Book(Integer volumeNumber,
+                String title,
+                String summary,
+                LocalDate publishDate,
+                User user,
+                Series series,
+                Set<Genre> genres) {
+
         this.volumeNumber = volumeNumber;
         this.title = title;
         this.summary = summary;
         this.publishDate = publishDate;
         this.user = user;
         this.series = series;
-        this.genres = genres;
+        this.genres = (genres != null) ? genres : new HashSet<>();
     }
 
-    // ADD HASHTAG HELPER METHOD
+    // ---------------------------
+    // Helper Methods
+    // ---------------------------
+    public void addChapter(Chapter chapter) {
+        chapters.add(chapter);
+        chapter.setBook(this);
+    }
+
+    public void removeChapter(Chapter chapter) {
+        chapters.remove(chapter);
+        chapter.setBook(null);
+    }
+
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setBook(this);
+    }
+
+    public void removeReview(Review review) {
+        reviews.remove(review);
+        review.setBook(null);
+    }
+
+    public void addGenre(Genre genre) {
+        genres.add(genre);
+        genre.getBooks().add(this);
+    }
+
+    public void removeGenre(Genre genre) {
+        genres.remove(genre);
+        genre.getBooks().remove(this);
+    }
+
     public void addHashtag(Hashtag hashtag) {
-        BookHashtag bookHashtag = new BookHashtag(this, hashtag);
-        bookHashtags.add(bookHashtag);
+        BookHashtag bh = new BookHashtag(this, hashtag);
+        bookHashtags.add(bh);
+        hashtag.getBookHashtags().add(bh);
     }
 
-    // REMOVE HASHTAG HELPER METHOD
-    public void removeHashtag(BookHashtag bookHashtag) {
-        bookHashtags.remove(bookHashtag);
+    public void removeHashtag(Hashtag hashtag) {
+        bookHashtags.removeIf(bh -> {
+            if (bh.getHashtag().equals(hashtag)) {
+                hashtag.getBookHashtags().remove(bh);
+                bh.setBook(null);
+                bh.setHashtag(null);
+                return true;
+            }
+            return false;
+        });
     }
 
+    // -----------------------
+    // Equals & HashCode
+    // -----------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return bookId != null && bookId.equals(book.bookId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    // ---------------------------
     // Getters and Setters
+    // ---------------------------
+
     public Long getBookId() {
         return bookId;
     }
+
     public void setBookId(Long bookId) {
         this.bookId = bookId;
     }
@@ -103,6 +173,7 @@ public class Book {
     public Integer getVolumeNumber() {
         return volumeNumber;
     }
+
     public void setVolumeNumber(Integer volumeNumber) {
         this.volumeNumber = volumeNumber;
     }
@@ -110,6 +181,7 @@ public class Book {
     public String getTitle() {
         return title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -117,6 +189,7 @@ public class Book {
     public String getSummary() {
         return summary;
     }
+
     public void setSummary(String summary) {
         this.summary = summary;
     }
@@ -124,6 +197,7 @@ public class Book {
     public LocalDate getPublishDate() {
         return publishDate;
     }
+
     public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
     }
@@ -131,6 +205,7 @@ public class Book {
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -138,6 +213,7 @@ public class Book {
     public Series getSeries() {
         return series;
     }
+
     public void setSeries(Series series) {
         this.series = series;
     }
@@ -145,6 +221,7 @@ public class Book {
     public Set<Genre> getGenres() {
         return genres;
     }
+
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
     }
@@ -152,6 +229,7 @@ public class Book {
     public Set<Review> getReviews() {
         return reviews;
     }
+
     public void setReviews(Set<Review> reviews) {
         this.reviews = reviews;
     }
@@ -159,6 +237,7 @@ public class Book {
     public List<Chapter> getChapters() {
         return chapters;
     }
+
     public void setChapters(List<Chapter> chapters) {
         this.chapters = chapters;
     }
@@ -166,6 +245,7 @@ public class Book {
     public Set<BookHashtag> getBookHashtags() {
         return bookHashtags;
     }
+
     public void setBookHashtags(Set<BookHashtag> bookHashtags) {
         this.bookHashtags = bookHashtags;
     }

@@ -13,11 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 
 @Service
+@Transactional
 public class ChapterService {
 
     private final ChapterRepository chapterRepo;
@@ -56,7 +58,16 @@ public class ChapterService {
         if (contentType == null || (!contentType.equalsIgnoreCase("text/markdown")
                 && !contentType.equalsIgnoreCase("text/html"))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid content type, only markdown or html are supported");
+                    "Invalid content type, only text/markdown or text/html are supported");
+        }
+
+        // Extension and content-type consistency
+        if (filename.toLowerCase().endsWith(".md") && !contentType.equalsIgnoreCase("text/markdown")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Markdown files must use text/markdown");
+        }
+
+        if (filename.toLowerCase().endsWith(".html") && !contentType.equalsIgnoreCase("text/html")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "HTML files must use text/html");
         }
 
         // Generate a unique key for S3
@@ -82,8 +93,12 @@ public class ChapterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chapter number must be positive");
         }
 
+        if (request.getContentType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content type required");
+        }
+
         // Prevent duplicate chapter numbers per book
-        if (chapterRepo.existsByBookIdAndChapterNumber(bookId, request.getChapterNumber())) {
+        if (chapterRepo.existsByBookBookIdAndChapterNumber(bookId, request.getChapterNumber())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chapter number already exists for this book");
         }
 
@@ -109,14 +124,9 @@ public class ChapterService {
         Page<Chapter> chapterPage =
                 chapterRepo.findByBookBookIdOrderByChapterNumberAsc(bookId, pageable);
 
-        return chapterPage.map(ch -> {
-
-            String previewUrl = ch.isPreview()
-                    ? s3Service.generatePresignedUrl(ch.getS3Key(), 15)
-                    : null;
-
-            return mapToResponseDTO(ch, previewUrl, null);
-        });
+        return chapterPage.map(ch ->
+            mapToResponseDTO(ch,null,null)
+        );
     }
 
     public ChapterResponseDTO getPreviewUrl(Long id) {

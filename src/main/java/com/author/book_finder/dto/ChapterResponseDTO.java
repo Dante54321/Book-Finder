@@ -1,15 +1,17 @@
 package com.author.book_finder.dto;
 
+import com.author.book_finder.enums.ContentType;
+
 public class ChapterResponseDTO {
     private Long chapterId;
     private int chapterNumber;
     private String title;
     private boolean isPreview;
-    private String contentType;
+    private ContentType contentType;
     private String previewUrl;
     private String fullUrl;
 
-    public ChapterResponseDTO(Long chapterId, int chapterNumber, String title, boolean isPreview, String contentType, String previewUrl, String fullUrl) {
+    public ChapterResponseDTO(Long chapterId, int chapterNumber, String title, boolean isPreview, ContentType contentType, String previewUrl, String fullUrl) {
         this.chapterId = chapterId;
         this.chapterNumber = chapterNumber;
         this.title = title;
@@ -51,11 +53,11 @@ public class ChapterResponseDTO {
         isPreview = preview;
     }
 
-    public String getContentType() {
+    public ContentType getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
     }
 

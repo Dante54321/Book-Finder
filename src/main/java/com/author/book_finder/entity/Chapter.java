@@ -1,13 +1,17 @@
 package com.author.book_finder.entity;
 
 import jakarta.persistence.*;
+import com.author.book_finder.enums.ContentType;
 
 @Entity
-@Table(name = "chapters", uniqueConstraints = @UniqueConstraint(columnNames = {"book_id", "chapter_number"}
-    )
+@Table(
+        name = "chapters",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"book_id", "chapter_number"}
+        )
 )
-
 public class Chapter {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chapterId;
@@ -23,35 +27,63 @@ public class Chapter {
     private String s3Key;
 
     @Column(nullable = false)
-    private boolean isPreview; // Preview: first chapter is free, login for full access
+    private boolean isPreview;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String contentType; // Content type for upload "MARKDOWN" or "HTML"
+    private ContentType contentType;
 
-    //-------------------------
+    // -------------------------
     // Many-to-One relationship
-    //-------------------------
+    // -------------------------
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    // -------------------------
     // Constructors
+    // -------------------------
+
     public Chapter() {}
 
-    public Chapter(int chapterNumber, String title, String s3Key, String contentType, boolean isPreview, Book book) {
+    public Chapter(int chapterNumber,
+                   String title,
+                   String s3Key,
+                   ContentType contentType,
+                   boolean isPreview) {
         this.chapterNumber = chapterNumber;
         this.title = title;
         this.s3Key = s3Key;
         this.contentType = contentType;
         this.isPreview = isPreview;
-        this.book = book;
     }
 
+    // ----------------------
+    // Equals & HashCode
+    // ----------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Chapter chapter = (Chapter) o;
+        return chapterId != null && chapterId.equals(chapter.chapterId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    // -------------------------
     // Getters and Setters
+    // -------------------------
+
     public Long getChapterId() {
         return chapterId;
     }
+
     public void setChapterId(Long chapterId) {
         this.chapterId = chapterId;
     }
@@ -59,6 +91,7 @@ public class Chapter {
     public int getChapterNumber() {
         return chapterNumber;
     }
+
     public void setChapterNumber(int chapterNumber) {
         this.chapterNumber = chapterNumber;
     }
@@ -66,6 +99,7 @@ public class Chapter {
     public String getTitle() {
         return title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -73,6 +107,7 @@ public class Chapter {
     public String getS3Key() {
         return s3Key;
     }
+
     public void setS3Key(String s3Key) {
         this.s3Key = s3Key;
     }
@@ -80,23 +115,27 @@ public class Chapter {
     public boolean isPreview() {
         return isPreview;
     }
+
     public void setPreview(boolean preview) {
         isPreview = preview;
     }
 
-    public String getContentType() {
+    public ContentType getContentType() {
         return contentType;
     }
-    public void setContentType(String contentType) {
+
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
     }
 
     public Book getBook() {
         return book;
     }
+
     public void setBook(Book book) {
         this.book = book;
     }
+
 
     @Override
     public String toString() {

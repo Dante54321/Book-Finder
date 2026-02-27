@@ -7,26 +7,37 @@ import java.util.Set;
 
 @Entity
 @Table(name = "hashtags")
-
 public class Hashtag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long hashtagId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     private String hashtag;
 
-    //--------------------------
-    // One-to-Many relationship
-    //--------------------------
-    @OneToMany(mappedBy = "hashtag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "hashtag",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Set<BookHashtag> bookHashtags = new HashSet<>();
 
-    // Constructors
     public Hashtag() {}
 
     public Hashtag(String hashtag) {
-        this.hashtag = hashtag;
+        this.hashtag = hashtag.trim().toLowerCase();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Hashtag that = (Hashtag) o;
+        return hashtagId != null && hashtagId.equals(that.hashtagId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     // Getters and Setters

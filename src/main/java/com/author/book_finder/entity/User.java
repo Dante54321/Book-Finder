@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name= "users")
-
+@Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -24,14 +24,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column
     private String firstName;
-
-    @Column
     private String lastName;
 
     @Column(nullable = false, updatable = false)
-    private LocalDate joinDate = LocalDate.now();
+    private LocalDate joinDate;
 
     @Column(length = 1600)
     private String bio;
@@ -40,32 +37,89 @@ public class User {
     private boolean isBanned = false;
 
     // Relationships
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Series> seriesList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Book>  books = new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review>  reviews = new ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER) // OK for Spring Security
     @JoinTable(
             name = "user_roles",
             joinColumns =  @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-
     private Set<Role> roles = new HashSet<>();
 
-    // Constructors
     public User() {}
 
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.joinDate = LocalDate.now();
+    }
+
+    // equals & hashCode
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return userId != null && userId.equals(user.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    // HELPER METHODS
+    public void addSeries(Series series) {
+        seriesList.add(series);
+        series.setUser(this);
+    }
+
+    public void removeSeries(Series series) {
+        seriesList.remove(series);
+        series.setUser(null);
+    }
+
+    public void addBook(Book book) {
+        books.add(book);
+        book.setUser(this);
+    }
+
+    public void removeBook(Book book) {
+        books.remove(book);
+        book.setUser(null);
+    }
+
+    public void addReview(Review review) {
+        reviews.add(review);
+        review.setUser(this);
+    }
+
+    public void removeReview(Review review) {
+        reviews.remove(review);
+        review.setUser(null);
+    }
+
+    public void addRole(Role role) {
+        roles.add(role);
+        role.getUsers().add(this);
+    }
+
+    public void removeRole(Role role) {
+        roles.remove(role);
+        role.getUsers().remove(this);
     }
 
     // Getters and Setters

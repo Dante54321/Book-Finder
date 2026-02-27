@@ -23,27 +23,10 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Presigner presigner;
 
-    public S3Service(S3Client s3Client, S3Presigner presigner) {
+    public S3Service (S3Client s3Client, S3Presigner presigner) {
         this.s3Client = s3Client;
         this.presigner = presigner;
     }
-
-/*
-    public String uploadFile(MultipartFile file) throws IOException {
-        String key = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .contentType(file.getContentType())
-                .build();
-
-        s3Client.putObject(putObjectRequest,
-                RequestBody.fromBytes(file.getBytes()));
-
-        return key;
-    }
-*/
 
     // Downloads
     public String generatePresignedUrl(String key, int expirationMinutes) {

@@ -1,11 +1,13 @@
 package com.author.book_finder.dto;
 
+import com.author.book_finder.enums.ContentType;
+
 public class ChapterConfirmUploadDTO {
     private String objectKey;
     private String title;
     private int chapterNumber;
     private boolean isPreview;
-    private String contentType;
+    private ContentType contentType;
 
     public String getObjectKey() {
         return objectKey;
@@ -37,11 +39,11 @@ public class ChapterConfirmUploadDTO {
         isPreview = preview;
     }
 
-    public String getContentType() {
+    public ContentType getContentType() {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(ContentType contentType) {
         this.contentType = contentType;
     }
 }

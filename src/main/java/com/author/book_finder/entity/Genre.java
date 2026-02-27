@@ -7,26 +7,36 @@ import java.util.Set;
 
 @Entity
 @Table(name = "genres")
-
 public class Genre {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long genreId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     private String genreName;
 
-    //-------------------------
-    // Many-to-Many relationship
-    //-------------------------
     @ManyToMany(mappedBy = "genres")
     private Set<Book> books = new HashSet<>();
 
-    // Constructors
     public Genre() {}
 
     public Genre(String genreName) {
         this.genreName = genreName;
+    }
+
+    // Equals & HashCode (ID-based)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Genre genre = (Genre) o;
+        return genreId != null && genreId.equals(genre.genreId);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     // Getters and Setters
