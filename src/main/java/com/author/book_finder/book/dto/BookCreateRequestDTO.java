@@ -8,9 +8,7 @@ public class BookCreateRequestDTO {
     private String title;
     private String summary;
     private LocalDate publishDate;
-
     private Long seriesId;
-
     private Set<Long> genreIds;
     private Set<String> hashtags;
 

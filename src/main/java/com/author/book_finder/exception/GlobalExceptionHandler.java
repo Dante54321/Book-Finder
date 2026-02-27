@@ -4,6 +4,7 @@ import com.author.book_finder.book.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -16,6 +17,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BookAccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(BookAccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex) {
+
+        HttpStatus status = (HttpStatus) ex.getStatusCode();
+
+        return buildResponse(status, ex.getReason());
     }
 
     @ExceptionHandler(Exception.class)

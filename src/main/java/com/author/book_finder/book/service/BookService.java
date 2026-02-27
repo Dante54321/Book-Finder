@@ -165,11 +165,17 @@ public class BookService {
     private void attachGenres(Book book, Set<Long> genreIds) {
 
         if (genreIds == null || genreIds.isEmpty()) {
-            book.getGenres().clear();
             return;
         }
 
-        Set<Genre> genres = new HashSet<>(genreRepository.findAllById(genreIds));
+        Set<Genre> genres = genreIds.stream()
+                .map(id -> genreRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Genre not found with id: " + id)))
+                .collect(Collectors.toSet());
+
         book.setGenres(genres);
     }
 
