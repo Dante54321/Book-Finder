@@ -1,4 +1,4 @@
-package com.author.book_finder.service;
+package com.author.book_finder.book.service;
 
 import com.author.book_finder.book.exception.BookAccessDeniedException;
 import com.author.book_finder.book.exception.BookNotFoundException;

@@ -1,7 +1,7 @@
 package com.author.book_finder.controller;
 
 import com.author.book_finder.dto.*;
-import com.author.book_finder.service.BookService;
+import com.author.book_finder.book.service.BookService;
 
 import com.author.book_finder.service.ChapterService;
 import org.springframework.data.domain.Page;
