@@ -64,7 +64,7 @@ public class AuthService {
 
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        user.setRoles(roles);
+        user.replaceRoles(roles);
 
         userRepository.save(user);
 

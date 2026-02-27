@@ -46,7 +46,7 @@ public class SeriesService {
         series.setSeriesName(seriesCreateRequestDTO.getSeriesName());
         series.setDescription(seriesCreateRequestDTO.getDescription());
         series.setPublishDate(seriesCreateRequestDTO.getPublishDate());
-        series.setUser(author);
+        author.addSeries(series);
 
         Series savedSeries = seriesRepository.save(series);
 
@@ -99,7 +99,7 @@ public class SeriesService {
 
         validateOwnership(series);
 
-        seriesRepository.delete(series);
+        series.getUser().removeSeries(series);
     }
 
     // OWNERSHIP VALIDATION (ADMIN BYPASS)

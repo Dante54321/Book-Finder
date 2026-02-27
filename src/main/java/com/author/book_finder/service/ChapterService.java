@@ -109,9 +109,7 @@ public class ChapterService {
         chapter.setChapterNumber(request.getChapterNumber());
         chapter.setPreview(request.isPreview());
         chapter.setContentType(request.getContentType());
-        chapter.setBook(book);
-
-        chapterRepo.save(chapter);
+        book.addChapter(chapter);
 
         // Generate a presigned GET URL for clients to download/view this chapter
         String downloadUrl = s3Service.generatePresignedUrl(request.getObjectKey(), 60);

@@ -141,7 +141,6 @@ public class Book {
         hashtag.getBooks().remove(this);
     }
 
-
     // -----------------------
     // Equals & HashCode
     // -----------------------
@@ -220,37 +219,34 @@ public class Book {
     }
 
     public Set<Genre> getGenres() {
-        return genres;
+        return Collections.unmodifiableSet(genres);
     }
 
-    public void setGenres(Set<Genre> genres) {
-        this.genres = genres;
+    public void replaceGenres(Set<Genre> genres) {
+        this.genres.clear();
+        if (genres != null) {
+            genres.forEach(this::addGenre);
+        }
     }
 
     public Set<Hashtag> getHashtags() {
-        return hashtags;
+        return Collections.unmodifiableSet(hashtags);
     }
 
-    public void setHashtags(Set<Hashtag> hashtags) {
-        this.hashtags = hashtags;
+    public void replaceHashtags(Set<Hashtag> hashtags) {
+        this.hashtags.clear();
+        if (hashtags != null) {
+            hashtags.forEach(this::addHashtag);
+        }
     }
 
     public Set<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(Set<Review> reviews) {
-        this.reviews = reviews;
+        return Collections.unmodifiableSet(reviews);
     }
 
     public List<Chapter> getChapters() {
-        return chapters;
+        return Collections.unmodifiableList(chapters);
     }
-
-    public void setChapters(List<Chapter> chapters) {
-        this.chapters = chapters;
-    }
-
 
     @Override
     public String toString() {

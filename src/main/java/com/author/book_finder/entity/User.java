@@ -3,10 +3,7 @@ package com.author.book_finder.entity;
 import com.author.book_finder.book.entity.Book;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -180,39 +177,35 @@ public class User {
         this.bio = bio;
     }
 
-    public Boolean getBanned() {
+    public boolean getBanned() {
         return isBanned;
     }
-    public void setBanned(Boolean banned) {
+    public void setBanned(boolean banned) {
         isBanned = banned;
     }
 
     public List<Series> getSeriesList() {
-        return seriesList;
-    }
-    public void setSeriesList(List<Series> seriesList) {
-        this.seriesList = seriesList;
+        return Collections.unmodifiableList(seriesList);
     }
 
     public List<Book> getBooks() {
-        return books;
-    }
-    public void setBooks(List<Book> books) {
-        this.books = books;
+        return Collections.unmodifiableList(books);
     }
 
     public List<Review> getReviews() {
-        return reviews;
-    }
-    public void setReviews(List<Review> reviews) {
-        this.reviews = reviews;
+        return Collections.unmodifiableList(reviews);
     }
 
     public Set<Role> getRoles() {
-        return roles;
+        return Collections.unmodifiableSet(roles);
     }
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void replaceRoles(Set<Role> newRoles) {
+        for (Role role : new HashSet<>(roles)) {
+            removeRole(role);
+        }
+        if (newRoles != null) {
+            newRoles.forEach(this::addRole);
+        }
     }
 
     @Override

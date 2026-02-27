@@ -67,9 +67,9 @@ public class BookService {
         book.setTitle(dto.getTitle());
         book.setSummary(dto.getSummary());
         book.setPublishDate(dto.getPublishDate());
-        book.setUser(author);
+        author.addBook(book);
 
-        attachSeries(book, dto.getSeriesId(), null);
+        attachSeries(book, dto.getSeriesId());
         attachGenres(book, dto.getGenreIds());
         attachHashtags(book, dto.getHashtags());   // ← changed
 
@@ -122,7 +122,7 @@ public class BookService {
         }
 
         if (dto.getSeriesId() != null) {
-            attachSeries(book, dto.getSeriesId(), null);
+            attachSeries(book, dto.getSeriesId());
         }
 
         if (dto.getGenreIds() != null) {
@@ -150,17 +150,17 @@ public class BookService {
 
         validateOwnership(book);
 
-        bookRepository.delete(book);
+        book.getUser().removeBook(book);
     }
 
     // HELPER METHODS
-    private void attachSeries(Book book,
-                              Long seriesId,
-                              Long currentBookId) {
+    private void attachSeries(Book book, Long seriesId) {
 
-        // Standalone
+        // Removing series (standalone book)
         if (seriesId == null) {
-            book.setSeries(null);
+            if (book.getSeries() != null) {
+                book.getSeries().removeBook(book);
+            }
             book.setVolumeNumber(null);
             return;
         }
@@ -170,19 +170,22 @@ public class BookService {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found")
                 );
 
-        // UPDATING SERIES w/ NO VOLUME CHANGE
-        if (currentBookId != null &&
-                book.getSeries() != null &&
+        // If already in same series → do nothing
+        if (book.getSeries() != null &&
                 book.getSeries().getSeriesId().equals(seriesId)) {
-
-            book.setSeries(series);
             return;
         }
-        // AUTO ASSIGN volume
-        Integer maxVolume = bookRepository.findMaxVolumeBySeriesId(seriesId);
-        int nextVolume = maxVolume + 1;
 
-        book.setSeries(series);
+        // If switching series → remove from old one
+        if (book.getSeries() != null) {
+            book.getSeries().removeBook(book);
+        }
+
+        // Attach using aggregate method
+        series.addBook(book);
+
+        Integer maxVolume = bookRepository.findMaxVolumeBySeriesId(seriesId);
+        int nextVolume = (maxVolume == null ? 1 : maxVolume + 1);
         book.setVolumeNumber(nextVolume);
     }
 
@@ -200,7 +203,7 @@ public class BookService {
                                         "Genre not found with id: " + id)))
                 .collect(Collectors.toSet());
 
-        book.setGenres(genres);
+        book.replaceGenres(genres);
     }
 
     private void attachHashtags(Book book, Set<String> hashtags) {
@@ -225,7 +228,7 @@ public class BookService {
             resolved.add(hashtag);
         }
 
-        book.setHashtags(resolved);
+        book.replaceHashtags(resolved);
     }
 
     // VALIDATE OWNERSHIP (ADMIN BYPASS)
