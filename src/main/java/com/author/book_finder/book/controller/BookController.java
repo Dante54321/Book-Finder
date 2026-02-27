@@ -3,9 +3,10 @@ package com.author.book_finder.book.controller;
 import com.author.book_finder.book.dto.BookCreateRequestDTO;
 import com.author.book_finder.book.dto.BookDetailsDTO;
 import com.author.book_finder.book.dto.BookResponseDTO;
+import com.author.book_finder.book.dto.BookUpdateRequestDTO;
 import com.author.book_finder.dto.*;
 import com.author.book_finder.book.service.BookService;
-
+import jakarta.validation.Valid;
 import com.author.book_finder.service.ChapterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class BookController {
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookResponseDTO> createBook(
-            @RequestBody BookCreateRequestDTO dto
+           @Valid @RequestBody BookCreateRequestDTO dto
     ) {
         return ResponseEntity.ok(bookService.createBook(dto));
     }
@@ -52,7 +53,7 @@ public class BookController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<BookResponseDTO> updateBook(
             @PathVariable Long id,
-            @RequestBody BookCreateRequestDTO dto
+            @Valid @RequestBody BookUpdateRequestDTO dto
     ) {
         return ResponseEntity.ok(bookService.updateBook(id, dto));
     }

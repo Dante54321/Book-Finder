@@ -24,7 +24,7 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 2000)
+    @Column(length = 2400)
     private String summary;
 
     @Column(nullable = false)
@@ -54,6 +54,14 @@ public class Book {
     )
     private Set<Genre> genres = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "book_hashtags",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
+    )
+    private Set<Hashtag> hashtags = new HashSet<>();
+
     // ---------------------------
     // One-to-Many relationships
     // ---------------------------
@@ -65,8 +73,7 @@ public class Book {
     @OrderBy("chapterNumber ASC")
     private List<Chapter> chapters = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BookHashtag> bookHashtags = new HashSet<>();
+
 
     // ---------------------------
     // Constructors
@@ -125,22 +132,15 @@ public class Book {
     }
 
     public void addHashtag(Hashtag hashtag) {
-        BookHashtag bh = new BookHashtag(this, hashtag);
-        bookHashtags.add(bh);
-        hashtag.getBookHashtags().add(bh);
+        hashtags.add(hashtag);
+        hashtag.getBooks().add(this);
     }
 
     public void removeHashtag(Hashtag hashtag) {
-        bookHashtags.removeIf(bh -> {
-            if (bh.getHashtag().equals(hashtag)) {
-                hashtag.getBookHashtags().remove(bh);
-                bh.setBook(null);
-                bh.setHashtag(null);
-                return true;
-            }
-            return false;
-        });
+        hashtags.remove(hashtag);
+        hashtag.getBooks().remove(this);
     }
+
 
     // -----------------------
     // Equals & HashCode
@@ -227,6 +227,14 @@ public class Book {
         this.genres = genres;
     }
 
+    public Set<Hashtag> getHashtags() {
+        return hashtags;
+    }
+
+    public void setHashtags(Set<Hashtag> hashtags) {
+        this.hashtags = hashtags;
+    }
+
     public Set<Review> getReviews() {
         return reviews;
     }
@@ -243,13 +251,6 @@ public class Book {
         this.chapters = chapters;
     }
 
-    public Set<BookHashtag> getBookHashtags() {
-        return bookHashtags;
-    }
-
-    public void setBookHashtags(Set<BookHashtag> bookHashtags) {
-        this.bookHashtags = bookHashtags;
-    }
 
     @Override
     public String toString() {

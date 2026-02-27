@@ -4,6 +4,7 @@ import com.author.book_finder.book.dto.BookDetailsDTO;
 import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.entity.Genre;
+import com.author.book_finder.entity.Hashtag;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -35,11 +36,11 @@ public class BookMapper {
                 .map(Genre::getGenreName)
                 .collect(Collectors.toSet());
 
-        Set<String> hashtagNames = book.getBookHashtags() == null
+        Set<String> hashtagNames = book.getHashtags() == null
                 ? Set.of()
-                : book.getBookHashtags()
+                : book.getHashtags()
                 .stream()
-                .map(bh -> bh.getHashtag().getHashtag())
+                .map(Hashtag::getHashtag)
                 .collect(Collectors.toSet());
 
         return new BookDetailsDTO(

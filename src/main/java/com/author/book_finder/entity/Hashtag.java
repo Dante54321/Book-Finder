@@ -1,5 +1,6 @@
 package com.author.book_finder.entity;
 
+import com.author.book_finder.book.entity.Book;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -16,10 +17,8 @@ public class Hashtag {
     @Column(nullable = false, unique = true, updatable = false)
     private String hashtag;
 
-    @OneToMany(mappedBy = "hashtag",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private Set<BookHashtag> bookHashtags = new HashSet<>();
+    @ManyToMany(mappedBy = "hashtags")
+    private Set<Book> books = new HashSet<>();
 
     public Hashtag() {}
 
@@ -55,12 +54,13 @@ public class Hashtag {
         this.hashtag = hashtag;
     }
 
-    public Set<BookHashtag> getBookHashtags() {
-        return bookHashtags;
+    public Set<Book> getBooks() {
+        return books;
     }
-    public void setBookHashtags(Set<BookHashtag> bookHashtags) {
-        this.bookHashtags = bookHashtags;
+    public void setBooks(Set<Book> books) {
+        this.books = books;
     }
+
 
     @Override
     public String toString() {

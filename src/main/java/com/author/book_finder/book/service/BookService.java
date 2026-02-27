@@ -1,5 +1,6 @@
 package com.author.book_finder.book.service;
 
+import com.author.book_finder.book.dto.BookUpdateRequestDTO;
 import com.author.book_finder.book.exception.BookAccessDeniedException;
 import com.author.book_finder.book.exception.BookNotFoundException;
 import com.author.book_finder.book.mapper.BookMapper;
@@ -96,24 +97,47 @@ public class BookService {
 
 
     // UPDATE BOOK
-    public BookResponseDTO updateBook(Long bookId, BookCreateRequestDTO dto) {
+    public BookResponseDTO updateBook(Long id, BookUpdateRequestDTO dto) {
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException(bookId));
+        Long userId = securityUtil.getCurrentUserId();
 
-        validateOwnership(book);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
 
-        book.setTitle(dto.getTitle());
-        book.setSummary(dto.getSummary());
-        book.setPublishDate(dto.getPublishDate());
+        if (!book.getUser().getUserId().equals(userId)) {
+            throw new BookAccessDeniedException();
+        }
 
-        attachSeries(book, dto.getSeriesId(), bookId);
-        attachGenres(book, dto.getGenreIds());
+        // Partial updates
+        if (dto.getTitle() != null) {
+            book.setTitle(dto.getTitle());
+        }
 
-        book.getBookHashtags().clear();
-        attachHashtags(book, dto.getHashtags());
+        if (dto.getSummary() != null) {
+            book.setSummary(dto.getSummary());
+        }
+
+        if (dto.getPublishDate() != null) {
+            book.setPublishDate(dto.getPublishDate());
+        }
+
+        if (dto.getSeriesId() != null) {
+            attachSeries(book, dto.getSeriesId(), null);
+        }
+
+        if (dto.getGenreIds() != null) {
+            if (dto.getGenreIds().isEmpty()) {
+                throw new IllegalArgumentException("Book must have at least one genre");
+            }
+            attachGenres(book, dto.getGenreIds());
+        }
+
+        if (dto.getHashtags() != null) {
+            attachHashtags(book, dto.getHashtags());
+        }
 
         Book updated = bookRepository.save(book);
+
         return bookMapper.toResponseDTO(updated);
     }
 
@@ -165,7 +189,7 @@ public class BookService {
     private void attachGenres(Book book, Set<Long> genreIds) {
 
         if (genreIds == null || genreIds.isEmpty()) {
-            return;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "At least one genre is required");
         }
 
         Set<Genre> genres = genreIds.stream()
@@ -181,33 +205,27 @@ public class BookService {
 
     private void attachHashtags(Book book, Set<String> hashtags) {
 
-        if (hashtags == null || hashtags.isEmpty()) {
+        if (hashtags == null) {
             return;
         }
 
-        // Normalize & Remove Duplicates
-        Set<String> normalizedTags = hashtags.stream()
+        Set<String> normalized = hashtags.stream()
                 .filter(Objects::nonNull)
                 .map(tag -> tag.trim().toLowerCase())
                 .filter(tag -> !tag.isBlank())
                 .collect(Collectors.toSet());
 
-        Set<BookHashtag> bookHashtags = new HashSet<>();
+        Set<Hashtag> resolved = new HashSet<>();
 
-        for (String normalized : normalizedTags) {
-
+        for (String name : normalized) {
             Hashtag hashtag = hashtagRepository
-                    .findByHashtag(normalized)
-                    .orElseGet(() -> {
-                        Hashtag newTag = new Hashtag(normalized);
-                        return hashtagRepository.save(newTag);
-                    });
+                    .findByHashtag(name)
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(name)));
 
-            BookHashtag bookHashtag = new BookHashtag(book, hashtag);
-            bookHashtags.add(bookHashtag);
+            resolved.add(hashtag);
         }
 
-        book.setBookHashtags(bookHashtags);
+        book.setHashtags(resolved);
     }
 
     // VALIDATE OWNERSHIP (ADMIN BYPASS)

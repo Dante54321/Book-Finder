@@ -1,28 +1,24 @@
 package com.author.book_finder.book.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Set;
 
-public class BookCreateRequestDTO {
+public class BookUpdateRequestDTO {
 
-    @NotBlank(message = "Title is required")
     @Size(max = 150, message = "Title must be under 150 characters")
     private String title;
 
-    @NotBlank(message = "Summary is required")
     @Size(max = 2400, message = "Summary must be under 2400 characters")
     private String summary;
 
-    @NotNull(message = "Publish date is required")
     private LocalDate publishDate;
 
     private Long seriesId;
 
-    @NotEmpty(message = "At least one genre must be selected")
     private Set<Long> genreIds;
-    private Set<String> hashtags;
 
+    private Set<String> hashtags;
 
     public String getTitle() {
         return title;
@@ -68,7 +64,7 @@ public class BookCreateRequestDTO {
         return hashtags;
     }
 
-    public void setHashtagIds(Set<String> hashtagIds) {
-        this.hashtags = hashtagIds;
+    public void setHashtags(Set<String> hashtags) {
+        this.hashtags = hashtags;
     }
 }
