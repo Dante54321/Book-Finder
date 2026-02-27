@@ -1,5 +1,8 @@
-package com.author.book_finder.controller;
+package com.author.book_finder.book.controller;
 
+import com.author.book_finder.book.dto.BookCreateRequestDTO;
+import com.author.book_finder.book.dto.BookDetailsDTO;
+import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.dto.*;
 import com.author.book_finder.book.service.BookService;
 

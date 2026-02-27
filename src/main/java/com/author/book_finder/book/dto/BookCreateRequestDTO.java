@@ -1,4 +1,4 @@
-package com.author.book_finder.dto;
+package com.author.book_finder.book.dto;
 
 import java.time.LocalDate;
 import java.util.Set;
