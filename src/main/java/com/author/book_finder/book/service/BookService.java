@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -57,7 +59,8 @@ public class BookService {
         Long userId = securityUtil.getCurrentUserId();
 
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
 
         Book book = new Book();
         book.setTitle(dto.getTitle());
@@ -65,9 +68,9 @@ public class BookService {
         book.setPublishDate(dto.getPublishDate());
         book.setUser(author);
 
-        attachSeries(book, dto.getSeriesId(),null);
+        attachSeries(book, dto.getSeriesId(), null);
         attachGenres(book, dto.getGenreIds());
-        attachHashtags(book, dto.getHashtagIds());
+        attachHashtags(book, dto.getHashtags());   // ← changed
 
         Book saved = bookRepository.save(book);
 
@@ -108,7 +111,7 @@ public class BookService {
         attachGenres(book, dto.getGenreIds());
 
         book.getBookHashtags().clear();
-        attachHashtags(book, dto.getHashtagIds());
+        attachHashtags(book, dto.getHashtags());
 
         Book updated = bookRepository.save(book);
         return bookMapper.toResponseDTO(updated);
@@ -170,18 +173,35 @@ public class BookService {
         book.setGenres(genres);
     }
 
-    private void attachHashtags(Book book, Set<Long> hashtagIds) {
+    private void attachHashtags(Book book, Set<String> hashtags) {
 
-        if (hashtagIds == null || hashtagIds.isEmpty()) {
+        if (hashtags == null || hashtags.isEmpty()) {
             return;
         }
 
-        Set<Hashtag> hashtags =
-                new HashSet<>(hashtagRepository.findAllById(hashtagIds));
+        // Normalize & Remove Duplicates
+        Set<String> normalizedTags = hashtags.stream()
+                .filter(Objects::nonNull)
+                .map(tag -> tag.trim().toLowerCase())
+                .filter(tag -> !tag.isBlank())
+                .collect(Collectors.toSet());
 
-        for (Hashtag hashtag : hashtags) {
-            book.addHashtag(hashtag);
+        Set<BookHashtag> bookHashtags = new HashSet<>();
+
+        for (String normalized : normalizedTags) {
+
+            Hashtag hashtag = hashtagRepository
+                    .findByHashtag(normalized)
+                    .orElseGet(() -> {
+                        Hashtag newTag = new Hashtag(normalized);
+                        return hashtagRepository.save(newTag);
+                    });
+
+            BookHashtag bookHashtag = new BookHashtag(book, hashtag);
+            bookHashtags.add(bookHashtag);
         }
+
+        book.setBookHashtags(bookHashtags);
     }
 
     // VALIDATE OWNERSHIP (ADMIN BYPASS)

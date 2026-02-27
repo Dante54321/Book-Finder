@@ -12,7 +12,7 @@ public class BookCreateRequestDTO {
     private Long seriesId;
 
     private Set<Long> genreIds;
-    private Set<Long> hashtagIds;
+    private Set<String> hashtags;
 
 
     public String getTitle() {
@@ -55,11 +55,11 @@ public class BookCreateRequestDTO {
         this.genreIds = genreIds;
     }
 
-    public Set<Long> getHashtagIds() {
-        return hashtagIds;
+    public Set<String> getHashtags() {
+        return hashtags;
     }
 
-    public void setHashtagIds(Set<Long> hashtagIds) {
-        this.hashtagIds = hashtagIds;
+    public void setHashtagIds(Set<String> hashtagIds) {
+        this.hashtags = hashtagIds;
     }
 }
