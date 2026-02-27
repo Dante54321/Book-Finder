@@ -2,11 +2,12 @@ package com.author.book_finder.service;
 
 import com.author.book_finder.book.exception.BookAccessDeniedException;
 import com.author.book_finder.book.exception.BookNotFoundException;
+import com.author.book_finder.book.repository.BookRepository;
 import com.author.book_finder.dto.BookCreateRequestDTO;
 import com.author.book_finder.dto.BookDetailsDTO;
 import com.author.book_finder.dto.BookResponseDTO;
 import com.author.book_finder.entity.*;
-import com.author.book_finder.entity.Book;
+import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.repository.*;
 import com.author.book_finder.security.SecurityUtil;
 import org.springframework.data.domain.Page;

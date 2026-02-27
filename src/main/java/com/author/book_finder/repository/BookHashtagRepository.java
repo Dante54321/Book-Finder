@@ -2,7 +2,7 @@ package com.author.book_finder.repository;
 
 import com.author.book_finder.entity.BookHashtag;
 import com.author.book_finder.entity.Hashtag;
-import com.author.book_finder.entity.Book;
+import com.author.book_finder.book.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

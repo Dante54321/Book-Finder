@@ -1,5 +1,6 @@
 package com.author.book_finder.entity;
 
+import com.author.book_finder.book.entity.Book;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
