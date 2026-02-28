@@ -12,6 +12,7 @@ import com.author.book_finder.entity.*;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.repository.*;
 import com.author.book_finder.security.SecurityUtil;
+import com.author.book_finder.service.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,7 @@ public class BookService {
     private final HashtagRepository hashtagRepository;
     private final SecurityUtil securityUtil;
     private final BookMapper bookMapper;
+    private final S3Service s3Service;
 
     public BookService(BookRepository bookRepository,
                        UserRepository userRepository,
@@ -44,7 +46,8 @@ public class BookService {
                        GenreRepository genreRepository,
                        HashtagRepository hashtagRepository,
                        SecurityUtil securityUtil,
-                       BookMapper bookMapper) {
+                       BookMapper bookMapper,
+                       S3Service s3Service) {
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
         this.seriesRepository = seriesRepository;
@@ -52,6 +55,7 @@ public class BookService {
         this.hashtagRepository = hashtagRepository;
         this.securityUtil = securityUtil;
         this.bookMapper = bookMapper;
+        this.s3Service = s3Service;
     }
 
 
@@ -72,7 +76,7 @@ public class BookService {
 
         attachSeries(book, dto.getSeriesId());
         attachGenres(book, dto.getGenreIds());
-        attachHashtags(book, dto.getHashtags());   // ← changed
+        attachHashtags(book, dto.getHashtags());
 
         Book saved = bookRepository.save(book);
 
@@ -100,14 +104,10 @@ public class BookService {
     // UPDATE BOOK
     public BookResponseDTO updateBook(Long id, BookUpdateRequestDTO dto) {
 
-        Long userId = securityUtil.getCurrentUserId();
-
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
 
-        if (!book.getUser().getUserId().equals(userId)) {
-            throw new BookAccessDeniedException();
-        }
+        validateOwnership(book);
 
         // Partial updates
         if (dto.getTitle() != null) {
@@ -151,17 +151,25 @@ public class BookService {
 
         validateOwnership(book);
 
+        // Delete chapter files from S3
+        for (Chapter chapter : book.getChapters()) {
+            if (chapter.getS3Key() != null && !chapter.getS3Key().isBlank()) {
+                s3Service.deleteObject(chapter.getS3Key());
+            }
+        }
+
         Series series = book.getSeries();
 
+        // Remove book from user
         book.getUser().removeBook(book);
 
+        // Renumber series AFTER removal
         if (series != null) {
             renumberVolumesInSeries(series);
         }
     }
 
     // HELPER METHODS
-
     private void attachSeries(Book book, Long seriesId) {
 
         // Removing series (standalone book)
@@ -172,7 +180,7 @@ public class BookService {
             if (oldSeries != null) {
                 oldSeries.removeBook(book);
                 book.setVolumeNumber(null);
-                renumberVolumesInSeries(oldSeries);   // ✅ FIX
+                renumberVolumesInSeries(oldSeries);
             }
 
             return;

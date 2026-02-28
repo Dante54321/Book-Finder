@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import com.author.book_finder.service.ChapterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -69,7 +70,7 @@ public class BookController {
     }
 
     //GENERATE UPLOAD URL
-    @PostMapping("/{bookId}/chapters/upload")
+    @PostMapping("/{bookId}/chapters/upload-url")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<PresignedUploadResponseDTO> generateUploadUrl(
             @PathVariable Long bookId,
@@ -100,7 +101,7 @@ public class BookController {
                         requestDTO
                 );
 
-        return ResponseEntity.ok(responseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
     // LIST CHAPTERS FOR BOOK PUBLIC

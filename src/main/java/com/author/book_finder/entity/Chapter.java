@@ -24,15 +24,16 @@ public class Chapter {
     private String title;
 
     // Store the S3 object key
-    @Column(nullable = false, length = 512)
-    private String s3Key;
-
     @Column(nullable = false)
-    private boolean isPreview;
+    private String s3Key;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContentType contentType;
+
+    public boolean isPreview() {
+        return this.chapterNumber == 1;
+    }
 
     // -------------------------
     // Many-to-One relationship
@@ -51,13 +52,11 @@ public class Chapter {
     public Chapter(int chapterNumber,
                    String title,
                    String s3Key,
-                   ContentType contentType,
-                   boolean isPreview) {
+                   ContentType contentType) {
         this.chapterNumber = chapterNumber;
         this.title = title;
         this.s3Key = s3Key;
         this.contentType = contentType;
-        this.isPreview = isPreview;
     }
 
     // ----------------------
@@ -111,14 +110,6 @@ public class Chapter {
 
     public void setS3Key(String s3Key) {
         this.s3Key = s3Key;
-    }
-
-    public boolean isPreview() {
-        return isPreview;
-    }
-
-    public void setPreview(boolean preview) {
-        isPreview = preview;
     }
 
     public ContentType getContentType() {

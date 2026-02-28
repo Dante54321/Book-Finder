@@ -6,7 +6,6 @@ public class ChapterConfirmUploadDTO {
     private String objectKey;
     private String title;
     private int chapterNumber;
-    private boolean isPreview;
     private ContentType contentType;
 
     public String getObjectKey() {
@@ -29,14 +28,6 @@ public class ChapterConfirmUploadDTO {
 
     public void setChapterNumber(int chapterNumber) {
         this.chapterNumber = chapterNumber;
-    }
-
-    public boolean isPreview() {
-        return isPreview;
-    }
-
-    public void setPreview(boolean preview) {
-        isPreview = preview;
     }
 
     public ContentType getContentType() {

@@ -1,9 +1,6 @@
 package com.author.book_finder.service;
 
-import com.author.book_finder.dto.ChapterConfirmUploadDTO;
-import com.author.book_finder.dto.ChapterResponseDTO;
-import com.author.book_finder.dto.ChapterUploadResponseDTO;
-import com.author.book_finder.dto.PresignedUploadResponseDTO;
+import com.author.book_finder.dto.*;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.entity.Chapter;
 import com.author.book_finder.book.repository.BookRepository;
@@ -70,8 +67,13 @@ public class ChapterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "HTML files must use text/html");
         }
 
-        // Generate a unique key for S3
-        String objectKey = UUID.randomUUID() + "_" + filename;
+        // Create ObjectKey Scoped Per Book
+        String objectKey =
+                "books/" + bookId +
+                        "/chapters/" +
+                        UUID.randomUUID() + "_" + filename;
+
+        // Generate Upload PresignedUrl
         String uploadUrl = s3Service.generatePresignedUploadUrl(objectKey, contentType, 15);
 
         return new PresignedUploadResponseDTO(objectKey, uploadUrl);
@@ -102,19 +104,77 @@ public class ChapterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chapter number already exists for this book");
         }
 
+        // Ensure ObjectKey is present
+        if (request.getObjectKey() == null || request.getObjectKey().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Object key is required"
+            );
+        }
+
+        // Ensure objectKey belongs to this book (prefix validation)
+        String expectedPrefix = "books/" + bookId + "/chapters/";
+
+        if (!request.getObjectKey().startsWith(expectedPrefix)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid object key for this book"
+            );
+        }
+
+        // Verify Object Uploaded before creating Chapter in DB
+        if (!s3Service.objectExists(request.getObjectKey())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Object does not exist");
+        }
+
         // Create and save the chapter entity
         Chapter chapter = new Chapter();
         chapter.setS3Key(request.getObjectKey());
         chapter.setTitle(request.getTitle());
         chapter.setChapterNumber(request.getChapterNumber());
-        chapter.setPreview(request.isPreview());
         chapter.setContentType(request.getContentType());
+
         book.addChapter(chapter);
 
         // Generate a presigned GET URL for clients to download/view this chapter
         String downloadUrl = s3Service.generatePresignedUrl(request.getObjectKey(), 60);
 
         return new ChapterUploadResponseDTO(chapter.getChapterId(), downloadUrl);
+    }
+
+    // Update Chapter
+    public ChapterResponseDTO updateChapter(Long chapterId, ChapterUpdateDTO request) {
+
+        Chapter chapter = chapterRepo.findById(chapterId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Chapter not found"));
+
+        validateOwnership(chapter.getBook());
+
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            chapter.setTitle(request.getTitle());
+        }
+
+        return mapToResponseDTO(chapter, null, null);
+    }
+
+    public void deleteChapter(Long chapterId) {
+
+        Chapter chapter = chapterRepo.findById(chapterId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Chapter not found"));
+
+        validateOwnership(chapter.getBook());
+
+        // Check for S3Key before Deletion
+        if (chapter.getS3Key() != null && !chapter.getS3Key().isBlank()) {
+            s3Service.deleteObject(chapter.getS3Key());
+        }
+
+        // Delete DB record
+        chapterRepo.delete(chapter);
     }
 
     public Page<ChapterResponseDTO> listChaptersForBook(Long bookId, Pageable pageable) {
@@ -130,9 +190,13 @@ public class ChapterService {
     public ChapterResponseDTO getPreviewUrl(Long id) {
         Chapter ch = chapterRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found"));
-        if (!ch.isPreview()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chapter is not a preview");
+
+        if (ch.getChapterNumber() != 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Chapter not available as preview");
         }
+
         String previewUrl = s3Service.generatePresignedUrl(ch.getS3Key(), 15);
 
         return mapToResponseDTO(ch, previewUrl, null);
