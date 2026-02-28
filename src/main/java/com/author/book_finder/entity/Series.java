@@ -33,7 +33,7 @@ public class Series {
     // -----------------------------
     // One-to-Many relationship
     // -----------------------------
-    @OneToMany(mappedBy ="series", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy ="series", cascade = CascadeType.ALL)
     @OrderBy("volumeNumber ASC")
     private List<Book> books = new ArrayList<>();
 

@@ -142,8 +142,6 @@ public class ChapterService {
         Chapter ch = chapterRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found"));
 
-        validateOwnership(ch.getBook());
-
         String fullUrl = s3Service.generatePresignedUrl(ch.getS3Key(), 60);
 
         return mapToResponseDTO(ch, null, fullUrl);

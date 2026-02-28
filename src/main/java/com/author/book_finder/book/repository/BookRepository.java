@@ -19,10 +19,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     boolean existsBySeries_SeriesIdAndVolumeNumber(Long seriesId, int volumeNumber);
     boolean existsBySeries_SeriesIdAndVolumeNumberAndBookIdNot(Long seriesId, int volumeNumber, Long currentBookId);
 
-
+    
     List<Book> findByUser(User user);
     List<Book> findBySeries(Series series);
     List<Book> findByTitleContainingIgnoreCase(String title);
 
 
+    List<Book> findBySeriesOrderByVolumeNumberAsc(Series series);
 }

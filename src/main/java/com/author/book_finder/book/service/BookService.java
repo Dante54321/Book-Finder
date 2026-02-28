@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -150,18 +151,30 @@ public class BookService {
 
         validateOwnership(book);
 
+        Series series = book.getSeries();
+
         book.getUser().removeBook(book);
+
+        if (series != null) {
+            renumberVolumesInSeries(series);
+        }
     }
 
     // HELPER METHODS
+
     private void attachSeries(Book book, Long seriesId) {
 
         // Removing series (standalone book)
         if (seriesId == null) {
-            if (book.getSeries() != null) {
-                book.getSeries().removeBook(book);
+
+            Series oldSeries = book.getSeries();
+
+            if (oldSeries != null) {
+                oldSeries.removeBook(book);
+                book.setVolumeNumber(null);
+                renumberVolumesInSeries(oldSeries);   // ✅ FIX
             }
-            book.setVolumeNumber(null);
+
             return;
         }
 
@@ -170,24 +183,39 @@ public class BookService {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found")
                 );
 
-        // If already in same series → do nothing
+        // OWNERSHIP VALIDATION
+        Long currentUserId = securityUtil.getCurrentUserId();
+        if (!series.getUser().getUserId().equals(currentUserId)
+                && !securityUtil.isAdmin()) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You cannot add a book to another user's series"
+            );
+        }
+
+        // If already in same series do nothing
         if (book.getSeries() != null &&
                 book.getSeries().getSeriesId().equals(seriesId)) {
             return;
         }
 
-        // If switching series → remove from old one
-        if (book.getSeries() != null) {
-            book.getSeries().removeBook(book);
+        Series oldSeries = book.getSeries();
+
+        // If switching series remove from old one
+        if (oldSeries != null) {
+            oldSeries.removeBook(book);
+            renumberVolumesInSeries(oldSeries);
         }
 
-        // Attach using aggregate method
+        // Attach Series to Book
+        book.setVolumeNumber(null);
+
         series.addBook(book);
 
-        Integer maxVolume = bookRepository.findMaxVolumeBySeriesId(seriesId);
-        int nextVolume = (maxVolume == null ? 1 : maxVolume + 1);
-        book.setVolumeNumber(nextVolume);
+        renumberVolumesInSeries(series);
+
     }
+
 
     private void attachGenres(Book book, Set<Long> genreIds) {
 
@@ -229,6 +257,21 @@ public class BookService {
         }
 
         book.replaceHashtags(resolved);
+    }
+
+    private void renumberVolumesInSeries(Series series) {
+        List<Book> books = bookRepository.findBySeriesOrderByVolumeNumberAsc(series);
+
+        for (Book b : books) {
+            if (b.getVolumeNumber() != null) {
+                b.setVolumeNumber(b.getVolumeNumber() + 1000);
+            }
+        }
+
+        int volume = 1;
+        for (Book b : books) {
+            b.setVolumeNumber(volume++);
+        }
     }
 
     // VALIDATE OWNERSHIP (ADMIN BYPASS)

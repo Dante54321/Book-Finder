@@ -2,9 +2,9 @@ package com.author.book_finder.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -63,5 +63,38 @@ public class S3Service {
                 presigner.presignPutObject(presignRequest);
 
         return presignedRequest.url().toExternalForm();
+    }
+
+    // Check If Object Exists
+    public boolean objectExists(String key) {
+
+        try {
+            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .build();
+
+            s3Client.headObject(headObjectRequest);
+            return true;
+        }  catch (S3Exception e) {
+
+            if  (e.statusCode() == 404) {
+                return false;
+            }
+
+            throw e;
+        }
+    }
+
+
+    // Delete Object
+    public void deleteObject(String key) {
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
     }
 }
