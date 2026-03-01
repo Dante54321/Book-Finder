@@ -136,6 +136,8 @@ public class ChapterService {
 
         book.addChapter(chapter);
 
+        chapterRepo.save(chapter);
+
         // Generate a presigned GET URL for clients to download/view this chapter
         String downloadUrl = s3Service.generatePresignedUrl(request.getObjectKey(), 60);
 
