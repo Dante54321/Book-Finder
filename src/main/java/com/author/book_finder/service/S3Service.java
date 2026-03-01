@@ -1,5 +1,6 @@
 package com.author.book_finder.service;
 
+import com.author.book_finder.enums.ContentType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,11 +48,11 @@ public class S3Service {
     }
 
     // Uploads
-    public String generatePresignedUploadUrl(String key, String contentType, int expirationMinutes) {
+    public String generatePresignedUploadUrl(String key, ContentType contentType, int expirationMinutes) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .contentType(contentType)
+                .contentType(contentType.getMimeType())
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()

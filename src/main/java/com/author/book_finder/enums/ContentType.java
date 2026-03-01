@@ -1,6 +1,16 @@
 package com.author.book_finder.enums;
 
 public enum ContentType {
-    MARKDOWN,
-    HTML
+    MARKDOWN("text/markdown"),
+    HTML("text/html");
+
+    private final String mimeType;
+
+    ContentType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
 }

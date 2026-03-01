@@ -6,6 +6,7 @@ import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.dto.BookUpdateRequestDTO;
 import com.author.book_finder.dto.*;
 import com.author.book_finder.book.service.BookService;
+import com.author.book_finder.enums.ContentType;
 import jakarta.validation.Valid;
 import com.author.book_finder.service.ChapterService;
 import org.springframework.data.domain.Page;
@@ -75,7 +76,7 @@ public class BookController {
     public ResponseEntity<PresignedUploadResponseDTO> generateUploadUrl(
             @PathVariable Long bookId,
             @RequestParam String filename,
-            @RequestParam String contentType) {
+            @RequestParam ContentType contentType) {
 
         PresignedUploadResponseDTO responseDTO =
                 chapterService.generateUploadUrl(

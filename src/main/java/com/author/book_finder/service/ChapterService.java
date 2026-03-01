@@ -4,6 +4,7 @@ import com.author.book_finder.dto.*;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.entity.Chapter;
 import com.author.book_finder.book.repository.BookRepository;
+import com.author.book_finder.enums.ContentType;
 import com.author.book_finder.repository.ChapterRepository;
 import com.author.book_finder.security.SecurityUtil;
 import org.springframework.data.domain.Page;
@@ -34,12 +35,12 @@ public class ChapterService {
         this.securityUtil = securityUtil;
 
     }
-
+/*
     // UPDATED GENERATE UPLOAD URL BOOK SPECIFIC
     public PresignedUploadResponseDTO generateUploadUrl(
             Long bookId,
             String filename,
-            String contentType) {
+            ContentType contentType) {
 
         Book book = bookRepo.findById(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
@@ -75,6 +76,54 @@ public class ChapterService {
 
         // Generate Upload PresignedUrl
         String uploadUrl = s3Service.generatePresignedUploadUrl(objectKey, contentType, 15);
+
+        return new PresignedUploadResponseDTO(objectKey, uploadUrl);
+    }
+*/
+
+    public PresignedUploadResponseDTO generateUploadUrl(
+            Long bookId,
+            String filename,
+            ContentType contentType) {
+
+        Book book = bookRepo.findById(bookId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        validateOwnership(book);
+
+        if (filename == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename is required");
+        }
+
+        String lowerFilename = filename.toLowerCase();
+
+        // Validate extension + enum consistency
+        if (lowerFilename.endsWith(".md")) {
+            if (contentType != ContentType.MARKDOWN) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Markdown files must use MARKDOWN content type");
+            }
+        } else if (lowerFilename.endsWith(".html")) {
+            if (contentType != ContentType.HTML) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "HTML files must use HTML content type");
+            }
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only .md or .html files are supported");
+        }
+
+        String objectKey =
+                "books/" + bookId +
+                        "/chapters/" +
+                        UUID.randomUUID() + "_" + filename;
+
+        String uploadUrl =
+                s3Service.generatePresignedUploadUrl(objectKey, contentType, 15);
 
         return new PresignedUploadResponseDTO(objectKey, uploadUrl);
     }
