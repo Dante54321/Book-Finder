@@ -1,9 +1,8 @@
-package com.author.book_finder.controller;
+package com.author.book_finder.chapter.controller;
 
-import com.author.book_finder.dto.ChapterResponseDTO;
-import com.author.book_finder.dto.ChapterUpdateDTO;
-import com.author.book_finder.entity.Chapter;
-import com.author.book_finder.service.ChapterService;
+import com.author.book_finder.chapter.dto.ChapterResponseDTO;
+import com.author.book_finder.chapter.dto.ChapterUpdateDTO;
+import com.author.book_finder.chapter.service.ChapterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

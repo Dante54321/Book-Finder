@@ -1,6 +1,6 @@
-package com.author.book_finder.dto;
+package com.author.book_finder.chapter.dto;
 
-import com.author.book_finder.enums.ContentType;
+import com.author.book_finder.chapter.enums.ContentType;
 
 public class ChapterResponseDTO {
     private Long chapterId;

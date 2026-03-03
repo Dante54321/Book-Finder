@@ -1,5 +1,6 @@
 package com.author.book_finder.book.entity;
 
+import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.entity.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;

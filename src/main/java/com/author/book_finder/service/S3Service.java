@@ -1,9 +1,8 @@
 package com.author.book_finder.service;
 
-import com.author.book_finder.enums.ContentType;
+import com.author.book_finder.chapter.enums.ContentType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;

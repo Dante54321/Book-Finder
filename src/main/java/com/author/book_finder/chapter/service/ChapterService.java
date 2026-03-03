@@ -1,12 +1,13 @@
-package com.author.book_finder.service;
+package com.author.book_finder.chapter.service;
 
-import com.author.book_finder.dto.*;
+import com.author.book_finder.chapter.dto.*;
 import com.author.book_finder.book.entity.Book;
-import com.author.book_finder.entity.Chapter;
+import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.book.repository.BookRepository;
-import com.author.book_finder.enums.ContentType;
-import com.author.book_finder.repository.ChapterRepository;
+import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.chapter.repository.ChapterRepository;
 import com.author.book_finder.security.SecurityUtil;
+import com.author.book_finder.service.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -35,51 +36,6 @@ public class ChapterService {
         this.securityUtil = securityUtil;
 
     }
-/*
-    // UPDATED GENERATE UPLOAD URL BOOK SPECIFIC
-    public PresignedUploadResponseDTO generateUploadUrl(
-            Long bookId,
-            String filename,
-            ContentType contentType) {
-
-        Book book = bookRepo.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
-
-        validateOwnership(book);
-
-        // Check for correct extensions/file types
-        if (filename == null || !(filename.toLowerCase().endsWith(".md") || filename.toLowerCase().endsWith(".html"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only .md or .html files are supported");
-        }
-
-        // Validate contentType if sent by client
-        if (contentType == null || (!contentType.equalsIgnoreCase("text/markdown")
-                && !contentType.equalsIgnoreCase("text/html"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid content type, only text/markdown or text/html are supported");
-        }
-
-        // Extension and content-type consistency
-        if (filename.toLowerCase().endsWith(".md") && !contentType.equalsIgnoreCase("text/markdown")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Markdown files must use text/markdown");
-        }
-
-        if (filename.toLowerCase().endsWith(".html") && !contentType.equalsIgnoreCase("text/html")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "HTML files must use text/html");
-        }
-
-        // Create ObjectKey Scoped Per Book
-        String objectKey =
-                "books/" + bookId +
-                        "/chapters/" +
-                        UUID.randomUUID() + "_" + filename;
-
-        // Generate Upload PresignedUrl
-        String uploadUrl = s3Service.generatePresignedUploadUrl(objectKey, contentType, 15);
-
-        return new PresignedUploadResponseDTO(objectKey, uploadUrl);
-    }
-*/
 
     public PresignedUploadResponseDTO generateUploadUrl(
             Long bookId,

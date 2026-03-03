@@ -1,4 +1,4 @@
-package com.author.book_finder.dto;
+package com.author.book_finder.chapter.dto;
 
 public class ChapterUploadResponseDTO {
     private Long chapterId;

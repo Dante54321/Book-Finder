@@ -1,8 +1,8 @@
-package com.author.book_finder.entity;
+package com.author.book_finder.chapter.entity;
 
 import com.author.book_finder.book.entity.Book;
 import jakarta.persistence.*;
-import com.author.book_finder.enums.ContentType;
+import com.author.book_finder.chapter.enums.ContentType;
 
 @Entity
 @Table(

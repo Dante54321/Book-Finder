@@ -8,6 +8,7 @@ import com.author.book_finder.book.repository.BookRepository;
 import com.author.book_finder.book.dto.BookCreateRequestDTO;
 import com.author.book_finder.book.dto.BookDetailsDTO;
 import com.author.book_finder.book.dto.BookResponseDTO;
+import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.entity.*;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.repository.*;

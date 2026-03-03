@@ -1,4 +1,4 @@
-package com.author.book_finder.enums;
+package com.author.book_finder.chapter.enums;
 
 public enum ContentType {
     MARKDOWN("text/markdown"),
