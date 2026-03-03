@@ -1,7 +1,7 @@
 package com.author.book_finder.security;
 
-import com.author.book_finder.entity.User;
-import com.author.book_finder.repository.UserRepository;
+import com.author.book_finder.user.entity.User;
+import com.author.book_finder.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
 
         return  UserDetailsImpl.build(user);
     }

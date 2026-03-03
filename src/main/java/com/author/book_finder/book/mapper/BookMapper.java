@@ -3,8 +3,8 @@ package com.author.book_finder.book.mapper;
 import com.author.book_finder.book.dto.BookDetailsDTO;
 import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.entity.Book;
-import com.author.book_finder.entity.Genre;
-import com.author.book_finder.entity.Hashtag;
+import com.author.book_finder.genre.entity.Genre;
+import com.author.book_finder.hashtag.entity.Hashtag;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;

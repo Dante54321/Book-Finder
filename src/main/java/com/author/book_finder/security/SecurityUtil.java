@@ -1,5 +1,6 @@
 package com.author.book_finder.security;
 
+import com.author.book_finder.user.enums.RoleName;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ public class SecurityUtil {
         return auth != null &&
                 auth.getAuthorities()
                         .stream()
-                        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                        .anyMatch(a -> a.getAuthority().equals(RoleName.ROLE_ADMIN));
     }
 
     public Long getCurrentUserId() {

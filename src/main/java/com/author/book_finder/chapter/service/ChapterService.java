@@ -7,7 +7,7 @@ import com.author.book_finder.book.repository.BookRepository;
 import com.author.book_finder.chapter.enums.ContentType;
 import com.author.book_finder.chapter.repository.ChapterRepository;
 import com.author.book_finder.security.SecurityUtil;
-import com.author.book_finder.service.S3Service;
+import com.author.book_finder.infrastructure.aws.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

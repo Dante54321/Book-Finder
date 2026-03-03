@@ -1,7 +1,7 @@
 package com.author.book_finder.genre.service;
 
 import com.author.book_finder.genre.dto.GenreResponseDTO;
-import com.author.book_finder.repository.GenreRepository;
+import com.author.book_finder.genre.repository.GenreRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,12 +1,13 @@
 package com.author.book_finder.security;
 
-import com.author.book_finder.entity.User;
+import com.author.book_finder.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ public class UserDetailsImpl implements UserDetails {
     private final Long userId;
     private final String username;
     private final String email;
+    private final boolean banned;
 
     @JsonIgnore
     private final String password;
@@ -23,18 +25,20 @@ public class UserDetailsImpl implements UserDetails {
 
     public UserDetailsImpl(Long userId, String username, String email,
                            String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+                           Collection<? extends GrantedAuthority> authorities, boolean banned) {
         this.userId = userId;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
+        this.banned = banned;
+
     }
 
     // Static factory method to build from a User entity
     public static UserDetailsImpl build(User user) {
         Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
                 .collect(Collectors.toSet());
 
         return new UserDetailsImpl(
@@ -42,7 +46,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                user.isBanned()
         );
     }
 
@@ -76,7 +81,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !banned;
     }
 
     @Override

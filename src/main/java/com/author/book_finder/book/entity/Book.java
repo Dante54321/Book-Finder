@@ -1,7 +1,11 @@
 package com.author.book_finder.book.entity;
 
 import com.author.book_finder.chapter.entity.Chapter;
-import com.author.book_finder.entity.*;
+import com.author.book_finder.genre.entity.Genre;
+import com.author.book_finder.hashtag.entity.Hashtag;
+import com.author.book_finder.review.entity.Review;
+import com.author.book_finder.series.entity.Series;
+import com.author.book_finder.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;

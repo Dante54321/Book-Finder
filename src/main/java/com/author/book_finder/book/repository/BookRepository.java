@@ -1,8 +1,8 @@
 package com.author.book_finder.book.repository;
 
 import com.author.book_finder.book.entity.Book;
-import com.author.book_finder.entity.User;
-import com.author.book_finder.entity.Series;
+import com.author.book_finder.user.entity.User;
+import com.author.book_finder.series.entity.Series;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

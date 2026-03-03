@@ -43,7 +43,6 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll() // allow signup/signin
-                                .requestMatchers("/api/public/**").permitAll() // public test endpoint
 
                                 // Series Browsing Public
                                 .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
