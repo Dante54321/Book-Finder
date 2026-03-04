@@ -1,3 +1,4 @@
+/* auth.css (login + signup only) */
 :root {
     --primary-red: #F05454; 
     --link-blue: #304FFE;  
@@ -6,10 +7,11 @@
     --text-muted: #666;
 }
 
+/* =============== GLOBAL (login/signup) =============== */
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    overflow: hidden; 
+  overflow: hidden; /* keep locked for login/signup */
 }
 
 .page-wrapper {
@@ -33,7 +35,6 @@ body {
     font-weight: 600;
 }
 
-/* for 'forgot password?' so it appears on the top right of the textbox */
 .label-row {
     display: flex; 
     justify-content: space-between;
@@ -71,7 +72,6 @@ input[type="password"] {
     box-sizing: border-box;
 }
 
-/* section where it says 'or' signin/signup */
 .form-footer {
     text-align: center; 
     margin-top: 20px;
@@ -82,7 +82,7 @@ input[type="password"] {
     margin: 5px 0;
 }
 
-/* global button styling */
+/* global button styling (forms) */
 button {
     width: 100%;
     padding: 15px;
@@ -116,11 +116,8 @@ button {
 
 /* bottom multi color footer */
 .bottom-decor-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 100%;
-    height: 25px;
+  height: 30px;
     display: flex;
 }
 
