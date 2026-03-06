@@ -1,6 +1,7 @@
 package com.author.book_finder.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
@@ -53,7 +54,7 @@ public class JwtUtils {
                     .build()
                     .parseSignedClaims(token);
             return true;
-        } catch (SecurityException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             // invalid signature, malformed, expired, etc.
         }
         return false;
