@@ -10,6 +10,7 @@ import com.author.book_finder.chapter.dto.ChapterUploadResponseDTO;
 import com.author.book_finder.chapter.dto.PresignedUploadResponseDTO;
 import com.author.book_finder.book.service.BookService;
 import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.search.dto.SearchRequestDTO;
 import jakarta.validation.Valid;
 import com.author.book_finder.chapter.service.ChapterService;
 import org.springframework.data.domain.Page;
@@ -115,5 +116,13 @@ public class BookController {
             Pageable pageable){
 
         return ResponseEntity.ok(chapterService.listChaptersForBook(bookId, pageable));
+    }
+
+    // SEARCH FEATURE
+    @PostMapping("/search")
+    public Page<BookResponseDTO> searchBooks(
+            @RequestBody SearchRequestDTO request) {
+
+        return bookService.searchBooks(request);
     }
 }
