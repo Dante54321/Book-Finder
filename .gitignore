@@ -35,6 +35,7 @@ build/
 ### Environment / Secrets ###
 .env
 .env.*
+backup.sql
 
 ### Logs ###
 *.log

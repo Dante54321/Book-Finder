@@ -2,6 +2,7 @@ package com.author.book_finder.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -47,8 +48,21 @@ public class SecurityConfig {
                 // Define public and protected routes
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers("/error").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll() // allow signup/signin
-                                .anyRequest().authenticated()               // protect other routes
+
+                                // Series Browsing Public
+                                .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/series/*").permitAll()
+
+                                // Book Browsing Public
+                                .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/chapters").permitAll()
+
+                                // Chapter Preview Public
+                                .requestMatchers(HttpMethod.GET, "/api/chapters/*/preview").permitAll()
+                                .anyRequest().authenticated() // protect other routes
                 )
 
                 // Add our JWT filter before UsernamePasswordAuthenticationFilter
