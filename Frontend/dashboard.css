@@ -30,8 +30,6 @@ body {
 .nav-left { display: flex; align-items: center; gap: 30px; }
 
 .logo { color: #f44336; font-weight: 700; font-size: 1.4rem; }
-.nav-links a { text-decoration: none; color: #333; margin: 0 15px; font-size: 0.9rem; }
-.nav-links a.active { color: #f44336; border-bottom: 2px solid #f44336; padding-bottom: 5px; }
 
 .logo-icon {
     width: 30px;

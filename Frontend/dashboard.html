@@ -3,30 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Finder Dashboard</title>
+    <title>Book Finder | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="dashboard.css"> </head>
-<body>
+    <!-- styles -->
+    <link rel="stylesheet" href="styles/global.css" />
+    <link rel="stylesheet" href="styles/navbar.css" />
 
-    <nav class="navbar">
-       <div class="logo">
-            <img src="./svg_files/bookfinder logo.svg" alt="Book Finder Logo" class="logo-icon"> BookFinder
-        </div>
-        <div class="nav-links">
-            <a href="#" class="active">Home</a>
-            <a href="#">My books</a>
-            <a href="#">Browse</a>
-            <a href="#">Community</a>
-        </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Search for Books">
-            </div>
-            <button class="btn-write">Write</button>
-            <div class="profile-icon"></div>
-        </div>
-    </nav>
+    <link rel="stylesheet" href="dashboard.css"/>
+    <!-- components -->
+    <script src="components/navbar.js" defer></script>
+</head>
+
+<body>
+ <bf-navbar active="home"></bf-navbar>
 
     <div class="main-content">
         <section class="shelf-container">

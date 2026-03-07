@@ -4,66 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookFinder | Create a Book</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- styles -->
+  <link rel="stylesheet" href="styles/global.css" />
+  <link rel="stylesheet" href="styles/navbar.css" />
+
   <link rel="stylesheet" href="./createbook.css" />
+  <!-- components -->
+  <script src="components/navbar.js" defer></script>
+ 
 </head>
 
 <body class="cb-body">
-
-  <!-- Top Nav -->
-  <header class="cb-nav">
-    <div class="cb-nav-left">
-      <div class="cb-brand">
-        <!-- <div class="cb-logo" aria-hidden="true">♦</div> -->
-         <img src="./svg_files/bookfinder logo.svg" alt="Book Finder Logo" class="cb-logo">
-        <span class="cb-brand-text">BookFinder</span>
-      </div>
-
-      <nav class="cb-links" aria-label="Primary">
-        <a class="cb-link active" href="#">Home</a>
-        <a class="cb-link" href="#">My books</a>
-        <a class="cb-link" href="#">Browse</a>
-        <a class="cb-link" href="#">Community</a>
-      </nav>
-    </div>
-
-    <div class="cb-nav-center">
-      <div class="cb-search">
-        <span class="cb-search-ic" aria-hidden="true">
-          <!-- magnifier -->
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-            <path d="M10.5 18a7.5 7.5 0 1 1 0-15a7.5 7.5 0 0 1 0 15Z" stroke="currentColor" stroke-width="2"/>
-            <path d="M16.2 16.2L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <input class="cb-search-input" type="text" placeholder="Search for Books" />
-        <button class="cb-filter" type="button" aria-label="Filter">
-          <!-- sliders -->
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-            <path d="M4 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M14 7a2 2 0 1 0 4 0a2 2 0 0 0-4 0Z" stroke="currentColor" stroke-width="2"/>
-            <path d="M8 17a2 2 0 1 0 4 0a2 2 0 0 0-4 0Z" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="cb-nav-right">
-      <a class="cb-write-btn" href="#">Write</a>
-
-      <button class="cb-icon-btn" type="button" aria-label="Notifications">
-        <!-- bell -->
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-          <path d="M12 22a2.2 2.2 0 0 0 2.2-2.2H9.8A2.2 2.2 0 0 0 12 22Z" fill="currentColor"/>
-          <path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2h16l-2-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </button>
-
-      <div class="cb-avatar" aria-label="Profile"></div>
-    </div>
-  </header>
+ <bf-navbar active="mybooks"></bf-navbar>
 
   <!-- Page -->
   <main class="cb-main">
