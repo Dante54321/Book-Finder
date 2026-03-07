@@ -75,6 +75,17 @@ public class AuthService {
     }
 
     public JwtResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
+
+         User u = userRepository.findByUsername(loginRequestDTO.getUsername()).orElse(null);
+    if (u != null) {
+        System.out.println("Found user: " + u.getUsername());
+        System.out.println("Stored hash: " + u.getPassword());
+        System.out.println("Password matches: " + passwordEncoder.matches(loginRequestDTO.getPassword(), u.getPassword()));
+        System.out.println("Is banned: " + u.isBanned());
+    } else {
+        System.out.println("User NOT found in DB");
+    }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequestDTO.getUsername(),
@@ -98,3 +109,4 @@ public class AuthService {
         );
     }
 }
+

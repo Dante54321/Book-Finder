@@ -22,7 +22,7 @@ loginForm.addEventListener("submit", async (e) => {
       alert("Log in successful! Redirecting to dashboard...");
       window.location.href = "dashboard.html";
     } else {
-      // Check if there is actually a body before trying to parse JSON
+      // check if there is actually a body before trying to parse JSON
       const errorText = await response.text();
       let errorMessage = "Login failed";
       try {
@@ -35,6 +35,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
   } catch (err) {
     console.error("Login error:", err);
+       alert("Unexpected error: " + err.message); // anything thats not 'invalid credentials'
   }
   
 });
