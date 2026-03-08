@@ -56,7 +56,7 @@ public class BookSpecifications {
 
             Join<Book, Hashtag> hashtagJoin = root.join("hashtags", JoinType.LEFT);
 
-            return hashtagJoin.get("hashtagName").in(hashtags);
+            return hashtagJoin.get("hashtag").in(hashtags);
         };
     }
 
