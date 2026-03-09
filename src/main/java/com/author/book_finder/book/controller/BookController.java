@@ -4,18 +4,11 @@ import com.author.book_finder.book.dto.BookCreateRequestDTO;
 import com.author.book_finder.book.dto.BookDetailsDTO;
 import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.dto.BookUpdateRequestDTO;
-import com.author.book_finder.chapter.dto.ChapterConfirmUploadDTO;
-import com.author.book_finder.chapter.dto.ChapterResponseDTO;
-import com.author.book_finder.chapter.dto.ChapterUploadResponseDTO;
-import com.author.book_finder.chapter.dto.PresignedUploadResponseDTO;
 import com.author.book_finder.book.service.BookService;
-import com.author.book_finder.chapter.enums.ContentType;
 import com.author.book_finder.search.dto.SearchRequestDTO;
 import jakarta.validation.Valid;
-import com.author.book_finder.chapter.service.ChapterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +19,9 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
 
     private final BookService bookService;
-    private final ChapterService chapterService;
 
-    public BookController(BookService bookService, ChapterService chapterService) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
-        this.chapterService = chapterService;
     }
 
     // CREATE BOOK
@@ -72,50 +63,6 @@ public class BookController {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
 
-    }
-
-    //GENERATE UPLOAD URL
-    @PostMapping("/{bookId}/chapters/upload-url")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<PresignedUploadResponseDTO> generateUploadUrl(
-            @PathVariable Long bookId,
-            @RequestParam String filename,
-            @RequestParam ContentType contentType) {
-
-        PresignedUploadResponseDTO responseDTO =
-                chapterService.generateUploadUrl(
-                        bookId,
-                        filename,
-                        contentType
-                );
-
-        return ResponseEntity.ok(responseDTO);
-
-    }
-
-    // CONFIRM UPLOAD & SAVE CHAPTER METADATA
-    @PostMapping("/{bookId}/chapters/confirm")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<ChapterUploadResponseDTO> confirmUpload(
-            @PathVariable Long bookId,
-            @RequestBody ChapterConfirmUploadDTO requestDTO) {
-
-        ChapterUploadResponseDTO responseDTO =
-                chapterService.confirmUpload(
-                        bookId,
-                        requestDTO
-                );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-    }
-
-    // LIST CHAPTERS FOR BOOK PUBLIC
-    @GetMapping("/{bookId}/chapters")
-    public ResponseEntity<Page<ChapterResponseDTO>> listChapters(
-            @PathVariable Long bookId,
-            Pageable pageable){
-
-        return ResponseEntity.ok(chapterService.listChaptersForBook(bookId, pageable));
     }
 
     // SEARCH FEATURE
