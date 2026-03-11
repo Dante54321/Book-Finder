@@ -11,7 +11,7 @@ class BookFinderNav extends HTMLElement {
 
           <nav class="nav-links" aria-label="Primary">
             <a class="nav-link" href="index.html"     data-page="home">Home</a>
-            <a class="nav-link" href="mybooks.html"   data-page="mybooks">My Books</a>
+            <a class="nav-link" href="dashboard.html"   data-page="mybooks">My Books</a>
             <a class="nav-link" href="browse.html"    data-page="browse">Browse</a>
             <a class="nav-link" href="community.html" data-page="community">Community</a>
           </nav>
