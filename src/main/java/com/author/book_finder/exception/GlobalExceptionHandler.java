@@ -75,6 +75,7 @@ public class GlobalExceptionHandler {
     // Fallback, if adding new exception handlers please place above this method!
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
+        ex.printStackTrace();
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
     }
 
