@@ -1,3 +1,5 @@
+const API_BASE = "https://book-finder-production-5c8b.up.railway.app";
+
 class BookFinderNav extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
@@ -94,20 +96,22 @@ class BookFinderNav extends HTMLElement {
       avatar.setAttribute('aria-expanded', 'false');
     });
 
-    // sign out 
     this.querySelector('#signout-btn').addEventListener('click', () => {
       localStorage.removeItem('username');
+      localStorage.removeItem('token');
       window.location.href = 'login.html';
     });
   }
 
   async loadCurrentUser() {
     const nameEl = this.querySelector('.nav-dropdown-name');
+    const token = localStorage.getItem("token");
 
     try {
-      // Calls GET /api/users/me — to get current user
-      const response = await fetch('/api/users/me', {
-        credentials: 'include'  
+      const response = await fetch(`${API_BASE}/api/users/me`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
 
       if (!response.ok) {
@@ -116,17 +120,14 @@ class BookFinderNav extends HTMLElement {
 
       const user = await response.json();
 
-      // use firstName + lastName if available, fall back to username
       const displayName = user.firstName
         ? `${user.firstName} ${user.lastName ?? ''}`.trim()
         : user.username;
 
       nameEl.textContent = displayName;
-
       localStorage.setItem('username', displayName);
 
     } catch (err) {
-      // network error or Spring isn't running then keep default username
       console.warn('Could not load current user:', err);
     }
   }
