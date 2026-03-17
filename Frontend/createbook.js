@@ -39,7 +39,7 @@ document.querySelector(".cb-form").addEventListener("submit", async function(e) 
     console.log("Book created:", data);
 
     alert("Book created successfully!");
-    window.location.href = "/profile.html";
+    window.location.href = "profile.html";
 
   } catch (error) {
     console.error(error);
