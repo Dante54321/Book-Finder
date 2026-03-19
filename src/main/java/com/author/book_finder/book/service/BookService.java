@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -188,17 +185,26 @@ public class BookService {
                 request.getSize()
         );
 
-        Specification<Book> spec = Specification.allOf();
+        // Normalize hashtags: trim + lowercase + remove # if needed
+        Set<String> cleanedHashtags = null;
+        if (request.getHashtags() != null) {
+            cleanedHashtags = request.getHashtags().stream()
+                    .filter(Objects::nonNull)
+                    .map(tag -> tag.trim().replaceAll("^#", "").toLowerCase())
+                    .filter(tag -> !tag.isBlank())
+                    .collect(Collectors.toSet());
+        }
 
-        spec = spec.and(BookSpecifications.keywordSearch(request.getKeyword()));
+        List<String> hashtagForSpec = cleanedHashtags == null ? null : new ArrayList<>(cleanedHashtags);
 
-        spec = spec.and(BookSpecifications.hasGenres(request.getGenres()));
-
-        spec = spec.and(BookSpecifications.hasHashtags(request.getHashtags()));
-
-        spec = spec.and(BookSpecifications.belongsToSeries(request.getSeriesId()));
-
-        spec = spec.and(BookSpecifications.belongsToUser(request.getUserId()));
+        Specification<Book> spec = Specification
+                .where(BookSpecifications.keywordSearch(request.getKeyword()))
+                .and(BookSpecifications.hasGenres(request.getGenres()))
+                .and(BookSpecifications.hasHashtags(hashtagForSpec))
+                .and(BookSpecifications.belongsToSeries(request.getSeriesId()))
+                .and(BookSpecifications.belongsToSeriesName(request.getSeriesName()))
+                .and(BookSpecifications.belongsToUser(request.getUserId()))
+                .and(BookSpecifications.belongsToUserName(request.getAuthorName()));
 
         Page<Book> books = bookRepository.findAll(spec, pageable);
 

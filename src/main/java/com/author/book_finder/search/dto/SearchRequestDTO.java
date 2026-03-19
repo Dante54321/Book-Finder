@@ -10,7 +10,10 @@ public class SearchRequestDTO {
     private List<String> hashtags;
 
     private Long seriesId;
+    private String seriesName;
+
     private Long userId;
+    private String authorName;
 
     private int page = 0;
     private int size = 10;
@@ -29,8 +32,14 @@ public class SearchRequestDTO {
     public Long getSeriesId() { return seriesId; }
     public void setSeriesId(Long seriesId) { this.seriesId = seriesId; }
 
+    public String getSeriesName() { return seriesName; }
+    public void setSeriesName(String seriesName) { this.seriesName = seriesName; }
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getAuthorName() { return authorName; }
+    public void setAuthorName(String authorName) { this.authorName = authorName; }
 
     public int getPage() { return page; }
     public void setPage(int page) { this.page = page; }
