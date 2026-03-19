@@ -1,4 +1,5 @@
 package com.author.book_finder.book.service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.author.book_finder.book.dto.BookUpdateRequestDTO;
 import com.author.book_finder.book.exception.BookAccessDeniedException;
@@ -161,6 +162,11 @@ public class BookService {
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
         validateOwnership(book);
+
+        // Delete cover file from S3
+        if (book.getCoverS3Key() != null && !book.getCoverS3Key().isBlank()) {
+            s3Service.deleteObject(book.getCoverS3Key());
+        }
 
         // Delete chapter files from S3
         for (Chapter chapter : book.getChapters()) {
@@ -327,6 +333,35 @@ public class BookService {
         if (!book.getUser().getUserId().equals(currentUserId) && !isAdmin) {
             throw new BookAccessDeniedException();
         }
+    }
+
+    public BookResponseDTO uploadCover(Long bookId, MultipartFile file) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        validateOwnership(book);
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cover file is required");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                !(contentType.equals("image/jpeg")
+                        || contentType.equals("image/png")
+                        || contentType.equals("image/webp"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only JPG, PNG, and WEBP covers are allowed");
+        }
+
+        if (book.getCoverS3Key() != null && !book.getCoverS3Key().isBlank()) {
+            s3Service.deleteObject(book.getCoverS3Key());
+        }
+
+        String key = s3Service.uploadBookCover(file, bookId);
+        book.setCoverS3Key(key);
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponseDTO(saved);
     }
 
 }

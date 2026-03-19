@@ -35,6 +35,9 @@ public class Book {
     @Column(nullable = false)
     private LocalDate publishDate;
 
+    @Column(name = "cover_s3_key", length = 512)
+    private String coverS3Key;
+
     // ---------------------------
     // Many-to-One relationships
     // ---------------------------
@@ -251,6 +254,14 @@ public class Book {
 
     public List<Chapter> getChapters() {
         return Collections.unmodifiableList(chapters);
+    }
+
+    public String getCoverS3Key() {
+        return coverS3Key;
+    }
+
+    public void setCoverS3Key(String coverS3Key) {
+        this.coverS3Key = coverS3Key;
     }
 
     @Override

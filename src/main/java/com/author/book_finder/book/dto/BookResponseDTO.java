@@ -10,19 +10,22 @@ public class BookResponseDTO {
     private LocalDate publishDate;
     private String authorUsername;
     private String seriesName;
+    private String coverUrl;
 
     public BookResponseDTO(Long bookId,
                            Integer volumeNumber,
                            String title,
                            LocalDate publishDate,
                            String authorUsername,
-                           String seriesName) {
+                           String seriesName,
+                           String coverUrl) {
         this.bookId = bookId;
         this.volumeNumber = volumeNumber;
         this.title = title;
         this.publishDate = publishDate;
         this.authorUsername = authorUsername;
         this.seriesName = seriesName;
+        this.coverUrl = coverUrl;
 
     }
 
@@ -73,4 +76,14 @@ public class BookResponseDTO {
     public void setSeriesName(String seriesName) {
         this.seriesName = seriesName;
     }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
 }
+
+

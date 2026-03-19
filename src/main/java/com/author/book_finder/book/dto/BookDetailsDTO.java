@@ -14,6 +14,7 @@ public class BookDetailsDTO {
     private String seriesName;
     private Set<String> genres;
     private Set<String> hashtags;
+    private String coverUrl;
 
     public BookDetailsDTO(Long bookId,
                           Integer volumeNumber,
@@ -23,7 +24,8 @@ public class BookDetailsDTO {
                           String authorUsername,
                           String seriesName,
                           Set<String> genres,
-                          Set<String> hashtags) {
+                          Set<String> hashtags,
+                          String coverUrl) {
         this.bookId = bookId;
         this.volumeNumber = volumeNumber;
         this.title = title;
@@ -33,6 +35,7 @@ public class BookDetailsDTO {
         this.seriesName = seriesName;
         this.genres = genres;
         this.hashtags = hashtags;
+        this.coverUrl = coverUrl;
     }
 
     public Long getBookId() {
@@ -105,5 +108,13 @@ public class BookDetailsDTO {
 
     public void setHashtags(Set<String> hashtags) {
         this.hashtags = hashtags;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 }

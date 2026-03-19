@@ -1,0 +1,2 @@
+ALTER TABLE books
+    ADD COLUMN cover_s3_key VARCHAR(512);

@@ -1,4 +1,6 @@
 package com.author.book_finder.book.controller;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.author.book_finder.book.dto.BookCreateRequestDTO;
 import com.author.book_finder.book.dto.BookDetailsDTO;
@@ -71,5 +73,14 @@ public class BookController {
             @RequestBody SearchRequestDTO request) {
 
         return bookService.searchBooks(request);
+    }
+
+    @PostMapping(value = "/{id}/cover", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<BookResponseDTO> uploadCover(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(bookService.uploadCover(id, file));
     }
 }

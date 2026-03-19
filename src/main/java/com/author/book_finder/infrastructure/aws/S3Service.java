@@ -1,5 +1,6 @@
 package com.author.book_finder.infrastructure.aws;
-
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import com.author.book_finder.chapter.enums.ContentType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -96,5 +97,34 @@ public class S3Service {
                 .build();
 
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    public String uploadBookCover(MultipartFile file, Long bookId) {
+        try {
+            String originalName = file.getOriginalFilename() != null
+                    ? file.getOriginalFilename()
+                    : "cover";
+
+            String key = "books/" + bookId + "/cover/" + System.currentTimeMillis() + "-" + originalName;
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(
+                    putObjectRequest,
+                    RequestBody.fromBytes(file.getBytes())
+            );
+
+            return key;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload cover to S3", e);
+        }
+    }
+
+    public String generateCoverUrl(String key, int expirationMinutes) {
+        return generatePresignedUrl(key, expirationMinutes);
     }
 }
