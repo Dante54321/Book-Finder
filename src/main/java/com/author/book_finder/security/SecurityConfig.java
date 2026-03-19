@@ -1,5 +1,6 @@
 package com.author.book_finder.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,6 +9,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,35 +32,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Disable CSRF since we are not using sessions
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
 
-                // Stateless session: JWT will manage user session
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // Define public and protected routes
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/error").permitAll()
-                                .requestMatchers("/api/auth/**").permitAll() // allow signup/signin
+                                .requestMatchers("/api/auth/**").permitAll()
 
-                                // Series Browsing Public
                                 .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/series/*").permitAll()
 
-                                // Book Browsing Public
                                 .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/books/*").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/chapters").permitAll()
 
-                                // Chapter Preview Public
                                 .requestMatchers(HttpMethod.GET, "/api/chapters/*/preview").permitAll()
-                                .anyRequest().authenticated() // protect other routes
+
+                                .anyRequest().authenticated()
                 )
 
-                // Add our JWT filter before UsernamePasswordAuthenticationFilter
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("""
+                                {
+                                    "status": 401,
+                                    "error": "Unauthorized",
+                                    "message": "Authentication required"
+                                }
+                            """);
+                        })
+                )
+
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -67,7 +77,8 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authProvider =
+                new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -80,6 +91,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();  // strong encoding for stored passwords
+        return new BCryptPasswordEncoder();
     }
 }
