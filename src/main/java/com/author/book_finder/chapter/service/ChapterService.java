@@ -4,7 +4,7 @@ import com.author.book_finder.chapter.dto.*;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.book.repository.BookRepository;
-import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.enums.FileType;
 import com.author.book_finder.chapter.repository.ChapterRepository;
 import com.author.book_finder.security.SecurityUtil;
 import com.author.book_finder.infrastructure.aws.S3Service;
@@ -40,7 +40,7 @@ public class ChapterService {
     public PresignedUploadResponseDTO generateUploadUrl(
             Long bookId,
             String filename,
-            ContentType contentType) {
+            FileType fileType) {
 
         Book book = bookRepo.findById(bookId)
                 .orElseThrow(() ->
@@ -56,13 +56,13 @@ public class ChapterService {
 
         // Validate extension + enum consistency
         if (lowerFilename.endsWith(".md")) {
-            if (contentType != ContentType.MARKDOWN) {
+            if (fileType != FileType.MARKDOWN) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         "Markdown files must use MARKDOWN content type");
             }
         } else if (lowerFilename.endsWith(".html")) {
-            if (contentType != ContentType.HTML) {
+            if (fileType != FileType.HTML) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         "HTML files must use HTML content type");
@@ -79,7 +79,7 @@ public class ChapterService {
                         UUID.randomUUID() + "_" + filename;
 
         String uploadUrl =
-                s3Service.generatePresignedUploadUrl(objectKey, contentType, 15);
+                s3Service.generatePresignedUploadUrl(objectKey, fileType, 15);
 
         return new PresignedUploadResponseDTO(objectKey, uploadUrl);
     }
@@ -100,7 +100,7 @@ public class ChapterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chapter number must be positive");
         }
 
-        if (request.getContentType() == null) {
+        if (request.getFileType() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content type required");
         }
 
@@ -137,7 +137,7 @@ public class ChapterService {
         chapter.setS3Key(request.getObjectKey());
         chapter.setTitle(request.getTitle());
         chapter.setChapterNumber(request.getChapterNumber());
-        chapter.setContentType(request.getContentType());
+        chapter.setFileType(request.getFileType());
 
         book.addChapter(chapter);
 
@@ -243,7 +243,7 @@ public class ChapterService {
                 chapter.getChapterNumber(),
                 chapter.getTitle(),
                 chapter.isPreview(),
-                chapter.getContentType(),
+                chapter.getFileType(),
                 previewUrl,
                 fullUrl
         );

@@ -1,7 +1,7 @@
 package com.author.book_finder.chapter.controller;
 
 import com.author.book_finder.chapter.dto.*;
-import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.enums.FileType;
 import com.author.book_finder.chapter.service.ChapterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +34,7 @@ public class ChapterController {
     }
 
     // LIST CHAPTERS FOR BOOK PUBLIC
-    @GetMapping("/book/{bookId}/chapters")
+    @GetMapping("/book/{bookId}/chapters/list")
     public ResponseEntity<Page<ChapterResponseDTO>> listChapters(
             @PathVariable Long bookId,
             Pageable pageable){
@@ -43,7 +43,7 @@ public class ChapterController {
     }
 
     // UPDATE CHAPTER
-    @PatchMapping("/chapters/{id}")
+    @PatchMapping("/chapters/{id}/update")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ChapterResponseDTO> updateChapter(
             @PathVariable Long id,
@@ -53,7 +53,7 @@ public class ChapterController {
     }
 
     // DELETE CHAPTER
-    @DeleteMapping("/chapters/{id}")
+    @DeleteMapping("/chapters/{id}/delete")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> deleteChapter(@PathVariable Long id) {
         chapterService.deleteChapter(id);
@@ -66,13 +66,13 @@ public class ChapterController {
     public ResponseEntity<PresignedUploadResponseDTO> generateUploadUrl(
             @PathVariable Long bookId,
             @RequestParam String filename,
-            @RequestParam ContentType contentType) {
+            @RequestParam FileType fileType) {
 
         PresignedUploadResponseDTO responseDTO =
                 chapterService.generateUploadUrl(
                         bookId,
                         filename,
-                        contentType
+                        fileType
                 );
 
         return ResponseEntity.ok(responseDTO);

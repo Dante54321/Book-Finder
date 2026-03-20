@@ -23,6 +23,8 @@ public class BookCreateRequestDTO {
     private Set<Long> genreIds;
     private Set<String> hashtags;
 
+    private String coverImageKey;
+
 
     public String getTitle() {
         return title;
@@ -70,5 +72,13 @@ public class BookCreateRequestDTO {
 
     public void setHashtagIds(Set<String> hashtagIds) {
         this.hashtags = hashtagIds;
+    }
+
+    public String getCoverImageKey() {
+        return coverImageKey;
+    }
+
+    public void setCoverImageKey(String coverImageKey) {
+        this.coverImageKey = coverImageKey;
     }
 }

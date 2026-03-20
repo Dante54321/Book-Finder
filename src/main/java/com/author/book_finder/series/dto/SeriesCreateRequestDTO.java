@@ -13,6 +13,8 @@ public class SeriesCreateRequestDTO {
 
     private LocalDate publishDate;
 
+    private String coverImageKey;
+
 
     public String getSeriesName() {
         return seriesName;
@@ -36,5 +38,13 @@ public class SeriesCreateRequestDTO {
 
     public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
+    }
+
+    public String getCoverImageKey() {
+        return coverImageKey;
+    }
+
+    public void setCoverImageKey(String coverImageKey) {
+        this.coverImageKey = coverImageKey;
     }
 }

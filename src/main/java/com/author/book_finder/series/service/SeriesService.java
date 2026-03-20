@@ -1,9 +1,9 @@
 package com.author.book_finder.series.service;
 
-import com.author.book_finder.series.dto.BooksInSeriesDTO;
-import com.author.book_finder.series.dto.SeriesCreateRequestDTO;
-import com.author.book_finder.series.dto.SeriesDetailsDTO;
-import com.author.book_finder.series.dto.SeriesResponseDTO;
+import com.author.book_finder.book.entity.Book;
+import com.author.book_finder.book.service.BookService;
+import com.author.book_finder.infrastructure.aws.S3Service;
+import com.author.book_finder.series.dto.*;
 import com.author.book_finder.series.entity.Series;
 import com.author.book_finder.user.entity.User;
 import com.author.book_finder.series.repository.SeriesRepository;
@@ -15,9 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.author.book_finder.enums.FileType;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -27,11 +30,15 @@ public class SeriesService {
     private final SeriesRepository seriesRepository;
     private final UserRepository userRepository;
     private final SecurityUtil securityUtil;
+    private final S3Service s3Service;
+    private final BookService bookService;
 
-    public SeriesService(SeriesRepository seriesRepository, UserRepository userRepository, SecurityUtil securityUtil) {
+    public SeriesService(SeriesRepository seriesRepository, UserRepository userRepository, SecurityUtil securityUtil, S3Service s3Service, BookService bookService) {
         this.seriesRepository = seriesRepository;
         this.userRepository = userRepository;
         this.securityUtil = securityUtil;
+        this.s3Service = s3Service;
+        this.bookService = bookService;
     }
 
     // CREATE SERIES
@@ -46,11 +53,49 @@ public class SeriesService {
         series.setSeriesName(seriesCreateRequestDTO.getSeriesName());
         series.setDescription(seriesCreateRequestDTO.getDescription());
         series.setPublishDate(seriesCreateRequestDTO.getPublishDate());
+
+        if (seriesCreateRequestDTO.getCoverImageKey() != null && !seriesCreateRequestDTO.getCoverImageKey().isBlank()) {
+            series.setCoverImageKey(seriesCreateRequestDTO.getCoverImageKey());
+        }
+
         author.addSeries(series);
 
         Series savedSeries = seriesRepository.save(series);
 
         return mapToResponseDTO(savedSeries);
+    }
+
+    // GENERATE PRESIGNED UPLOAD URL
+    public PresignedUploadResponseDTO generateCoverUploadUrl(Long seriesId, String filename, FileType fileType) {
+
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found"));
+
+        validateOwnership(series);
+
+        if (fileType != FileType.JPEG && fileType != FileType.PNG) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only JPEG or PNG allowed");
+        }
+
+        String key = "series/" + seriesId + "/cover/" + UUID.randomUUID() + "_" + filename;
+
+        return new PresignedUploadResponseDTO(
+                key,
+                s3Service.generatePresignedUploadUrl(key, fileType, 15)
+        );
+    }
+
+    // GET PRESIGNED URL FOR EXISTING SERIES COVER
+    public String getCoverUrl(Long seriesId) {
+
+        Series series = seriesRepository.findById(seriesId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found"));
+
+        if (series.getCoverImageKey() == null || series.getCoverImageKey().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cover not found");
+        }
+
+        return s3Service.generatePresignedUrl(series.getCoverImageKey(), 60);
     }
 
     // GET ALL SERIES PUBLIC
@@ -86,6 +131,15 @@ public class SeriesService {
         series.setDescription(seriesCreateRequestDTO.getDescription());
         series.setPublishDate(seriesCreateRequestDTO.getPublishDate());
 
+        if (seriesCreateRequestDTO.getCoverImageKey() != null && !seriesCreateRequestDTO.getCoverImageKey().isBlank()) {
+
+            if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
+                s3Service.deleteObject(series.getCoverImageKey());
+            }
+
+            series.setCoverImageKey(seriesCreateRequestDTO.getCoverImageKey());
+        }
+
         Series updatedSeries = seriesRepository.save(series);
 
         return mapToResponseDTO(updatedSeries);
@@ -98,6 +152,14 @@ public class SeriesService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found"));
 
         validateOwnership(series);
+
+        if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
+            s3Service.deleteObject(series.getCoverImageKey());
+        }
+
+        for (Book book : new ArrayList<>(series.getBooks())) {
+            bookService.deleteBook(book.getBookId());
+        }
 
         series.getUser().removeSeries(series);
     }

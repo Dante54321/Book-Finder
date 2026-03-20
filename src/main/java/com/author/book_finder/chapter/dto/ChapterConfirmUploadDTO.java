@@ -1,12 +1,12 @@
 package com.author.book_finder.chapter.dto;
 
-import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.enums.FileType;
 
 public class ChapterConfirmUploadDTO {
     private String objectKey;
     private String title;
     private int chapterNumber;
-    private ContentType contentType;
+    private FileType fileType;
 
     public String getObjectKey() {
         return objectKey;
@@ -30,11 +30,11 @@ public class ChapterConfirmUploadDTO {
         this.chapterNumber = chapterNumber;
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public FileType getFileType() {
+        return fileType;
     }
 
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
+    public void setFileType(FileType fileType) {
+        this.fileType = fileType;
     }
 }

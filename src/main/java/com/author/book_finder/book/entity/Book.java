@@ -35,6 +35,9 @@ public class Book {
     @Column(nullable = false)
     private LocalDate publishDate;
 
+    @Column(name = "cover_image_key", length = 512)
+    private String coverImageKey;
+
     // ---------------------------
     // Many-to-One relationships
     // ---------------------------
@@ -205,6 +208,14 @@ public class Book {
 
     public void setPublishDate(LocalDate publishDate) {
         this.publishDate = publishDate;
+    }
+
+    public void setCoverImageKey (String coverImageKey) {
+        this.coverImageKey = coverImageKey;
+    }
+
+    public String getCoverImageKey() {
+        return coverImageKey;
     }
 
     public User getUser() {

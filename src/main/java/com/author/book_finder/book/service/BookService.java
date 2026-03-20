@@ -1,16 +1,14 @@
 package com.author.book_finder.book.service;
 
-import com.author.book_finder.book.dto.BookUpdateRequestDTO;
+import com.author.book_finder.book.dto.*;
 import com.author.book_finder.book.exception.BookAccessDeniedException;
 import com.author.book_finder.book.exception.BookNotFoundException;
 import com.author.book_finder.book.mapper.BookMapper;
 import com.author.book_finder.book.repository.BookRepository;
-import com.author.book_finder.book.dto.BookCreateRequestDTO;
-import com.author.book_finder.book.dto.BookDetailsDTO;
-import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.specification.BookSpecifications;
 import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.book.entity.Book;
+import com.author.book_finder.enums.FileType;
 import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.genre.repository.GenreRepository;
 import com.author.book_finder.hashtag.entity.Hashtag;
@@ -80,6 +78,10 @@ public class BookService {
         book.setTitle(dto.getTitle());
         book.setSummary(dto.getSummary());
         book.setPublishDate(dto.getPublishDate());
+
+        if (dto.getCoverImageKey() != null && !dto.getCoverImageKey().isBlank()) {
+            book.setCoverImageKey(dto.getCoverImageKey());
+        }
         author.addBook(book);
 
         attachSeries(book, dto.getSeriesId());
@@ -89,6 +91,39 @@ public class BookService {
         Book saved = bookRepository.save(book);
 
         return bookMapper.toResponseDTO(saved);
+    }
+
+    // GENERATE UPLOAD URL FOR BOOK COVER IMAGE
+    public PresignedUploadResponseDTO generateCoverUploadUrl(Long bookId, String filename, FileType fileType) {
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        validateOwnership(book);
+
+        if (fileType != FileType.JPEG && fileType != FileType.PNG) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only JPEG or PNG allowed");
+        }
+
+        String key = "books/" + bookId + "/cover/" + UUID.randomUUID() + "_" + filename;
+
+        return new PresignedUploadResponseDTO(
+                key,
+                s3Service.generatePresignedUploadUrl(key, fileType, 15)
+        );
+    }
+
+    // GET PRESIGNED URL FOR EXISTING BOOK COVER
+    public String getCoverUrl(Long bookId) {
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        if (book.getCoverImageKey() == null || book.getCoverImageKey().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cover not found");
+        }
+
+        return s3Service.generatePresignedUrl(book.getCoverImageKey(), 60);
     }
 
     // GET ALL (PAGINATED)
@@ -145,6 +180,15 @@ public class BookService {
             attachHashtags(book, dto.getHashtags());
         }
 
+        if (dto.getCoverImageKey() != null && !dto.getCoverImageKey().isBlank()) {
+
+            if (book.getCoverImageKey() != null && !book.getCoverImageKey().isBlank()) {
+                s3Service.deleteObject(book.getCoverImageKey());
+            }
+
+            book.setCoverImageKey(dto.getCoverImageKey());
+        }
+
         Book updated = bookRepository.save(book);
 
         return bookMapper.toResponseDTO(updated);
@@ -164,6 +208,11 @@ public class BookService {
             if (chapter.getS3Key() != null && !chapter.getS3Key().isBlank()) {
                 s3Service.deleteObject(chapter.getS3Key());
             }
+        }
+
+        // Delete book cover image
+        if (book.getCoverImageKey() != null && !book.getCoverImageKey().isBlank()) {
+            s3Service.deleteObject(book.getCoverImageKey());
         }
 
         Series series = book.getSeries();

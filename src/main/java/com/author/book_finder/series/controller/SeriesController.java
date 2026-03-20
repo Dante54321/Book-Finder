@@ -1,6 +1,8 @@
 package com.author.book_finder.series.controller;
 
 
+import com.author.book_finder.enums.FileType;
+import com.author.book_finder.series.dto.PresignedUploadResponseDTO;
 import com.author.book_finder.series.dto.SeriesCreateRequestDTO;
 import com.author.book_finder.series.dto.SeriesDetailsDTO;
 import com.author.book_finder.series.dto.SeriesResponseDTO;
@@ -12,7 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/series")
+@RequestMapping("/api")
 public class SeriesController {
 
     private final SeriesService seriesService;
@@ -22,7 +24,7 @@ public class SeriesController {
     }
 
     // CREATE SERIES
-    @PostMapping
+    @PostMapping("/series/create")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<SeriesResponseDTO> createSeries(@RequestBody SeriesCreateRequestDTO dto) {
 
@@ -32,8 +34,25 @@ public class SeriesController {
 
     }
 
+    // GENERATE PRESIGNED URL FOR SERIES COVER
+    @PostMapping("/series/{seriesId}/cover/upload-url")
+    public ResponseEntity<PresignedUploadResponseDTO> generateCoverUploadUrl(
+            @PathVariable Long seriesId,
+            @RequestParam String filename,
+            @RequestParam FileType fileType) {
+
+        PresignedUploadResponseDTO responseDTO = seriesService.generateCoverUploadUrl(seriesId, filename, fileType);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    // GET COVER IMAGE URL
+    @GetMapping("/series/{seriesId}/cover")
+    public ResponseEntity<String> getCoverUrl(@PathVariable Long seriesId) {
+        return ResponseEntity.ok(seriesService.getCoverUrl(seriesId));
+    }
+
     // GET ALL SERIES
-    @GetMapping
+    @GetMapping("/series/list")
     public ResponseEntity<Page<SeriesResponseDTO>> getAllSeries(Pageable pageable) {
 
         Page<SeriesResponseDTO> seriesPage = seriesService.getAllSeries(pageable);
@@ -42,7 +61,7 @@ public class SeriesController {
     }
 
     // GET MY SERIES
-    @GetMapping("/me")
+    @GetMapping("/sereies/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<SeriesResponseDTO>> getMySeries(Pageable pageable) {
 
@@ -52,7 +71,7 @@ public class SeriesController {
     }
 
     // GET SERIES DETAILS
-    @GetMapping("/{id}")
+    @GetMapping("/series/{id}/details")
     public ResponseEntity<SeriesDetailsDTO> getSeriesDetails(@PathVariable Long id) {
 
         SeriesDetailsDTO details = seriesService.getSeriesDetails(id);
@@ -61,7 +80,7 @@ public class SeriesController {
     }
 
     // UPDATE SERIES
-    @PutMapping("/{id}")
+    @PutMapping("/sereies/{id}/update")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<SeriesResponseDTO> updateSeries(
             @PathVariable Long id,
@@ -73,7 +92,7 @@ public class SeriesController {
     }
 
     // DELETE SERIES
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/series/{id}/delete")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> deleteSeries(@PathVariable Long id) {
 

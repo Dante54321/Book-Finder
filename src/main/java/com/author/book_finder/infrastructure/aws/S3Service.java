@@ -1,6 +1,6 @@
 package com.author.book_finder.infrastructure.aws;
 
-import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.enums.FileType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -47,11 +47,11 @@ public class S3Service {
     }
 
     // Uploads
-    public String generatePresignedUploadUrl(String key, ContentType contentType, int expirationMinutes) {
+    public String generatePresignedUploadUrl(String key, FileType fileType, int expirationMinutes) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .contentType(contentType.getMimeType())
+                .contentType(fileType.getMimeType())
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()

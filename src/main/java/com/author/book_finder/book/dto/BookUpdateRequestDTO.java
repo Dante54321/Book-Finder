@@ -20,6 +20,8 @@ public class BookUpdateRequestDTO {
 
     private Set<String> hashtags;
 
+    private String coverImageKey;
+
     public String getTitle() {
         return title;
     }
@@ -66,5 +68,13 @@ public class BookUpdateRequestDTO {
 
     public void setHashtags(Set<String> hashtags) {
         this.hashtags = hashtags;
+    }
+
+    public String getCoverImageKey() {
+        return coverImageKey;
+    }
+
+    public void setCoverImageKey(String coverImageKey) {
+        this.coverImageKey = coverImageKey;
     }
 }

@@ -1,8 +1,9 @@
 package com.author.book_finder.chapter.entity;
 
-import com.author.book_finder.book.entity.Book;
+import
+        com.author.book_finder.book.entity.Book;
 import jakarta.persistence.*;
-import com.author.book_finder.chapter.enums.ContentType;
+import com.author.book_finder.enums.FileType;
 
 @Entity
 @Table(
@@ -29,7 +30,7 @@ public class Chapter {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ContentType contentType;
+    private FileType fileType;
 
     public boolean isPreview() {
         return this.chapterNumber == 1;
@@ -52,11 +53,11 @@ public class Chapter {
     public Chapter(int chapterNumber,
                    String title,
                    String s3Key,
-                   ContentType contentType) {
+                   FileType fileType) {
         this.chapterNumber = chapterNumber;
         this.title = title;
         this.s3Key = s3Key;
-        this.contentType = contentType;
+        this.fileType = fileType;
     }
 
     // ----------------------
@@ -112,12 +113,12 @@ public class Chapter {
         this.s3Key = s3Key;
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public FileType getFileType() {
+        return fileType;
     }
 
-    public void setContentType(ContentType contentType) {
-        this.contentType = contentType;
+    public void setFileType(FileType fileType) {
+        this.fileType = fileType;
     }
 
     public Book getBook() {
