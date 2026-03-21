@@ -15,6 +15,7 @@ public class AdminUserController {
         this.userService = userService;
     }
 
+    // BAN USER
     @PutMapping("/{id}/ban")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> banUser(@PathVariable Long id) {
@@ -22,6 +23,7 @@ public class AdminUserController {
         return ResponseEntity.noContent().build();
     }
 
+    // UNBAN USER
     @PutMapping("/{id}/unban")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> unbanUser(@PathVariable Long id) {

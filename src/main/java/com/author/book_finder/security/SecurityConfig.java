@@ -50,14 +50,26 @@ public class SecurityConfig {
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
 
-                                .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/series/*").permitAll()
+                                // BROWSE SERIES (PUBLIC)
+                                .requestMatchers(HttpMethod.GET, "/api/series/list").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/series/*/cover").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/series/*/details").permitAll()
 
-                                .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/books/*").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/books/*/chapters").permitAll()
+                                // BROWSE BOOK (PUBLIC)
+                                .requestMatchers(HttpMethod.GET, "/api/books/list").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/details").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/cover").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/books/search").permitAll()
 
+                                // BROWSE CHAPTER (PUBLIC) VIEW PREVIEW CHAPTER (PUBLIC)
                                 .requestMatchers(HttpMethod.GET, "/api/chapters/*/preview").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/chapters/list").permitAll()
+
+                                // USER PROFILE (PUBLIC)
+                                .requestMatchers(HttpMethod.GET, "/users/profile/*").permitAll()
+
+                                // BOOK REVIEWS (PUBLIC)
+                                .requestMatchers(HttpMethod.GET, "/books/*/reviews").permitAll()
 
                                 .anyRequest().authenticated()
                 )

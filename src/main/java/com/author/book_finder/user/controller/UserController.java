@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
@@ -26,18 +26,20 @@ public class UserController {
     }
 
 
-    //
-    @GetMapping("/{id}")
+    // GET USER BY ID
+    @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getById(id));
     }
 
-    @GetMapping
+    // LIST ALL USERS
+    @GetMapping("/users/list")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/me")
+    // GET CURRENT USER
+    @GetMapping("/users/me")
     public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
         String username = authentication.getName();
 
@@ -46,7 +48,8 @@ public class UserController {
         return ResponseEntity.ok(UserMapper.toResponseDTO(user));
     }
 
-    @PutMapping("/me")
+    // UPDATE PROFILE
+    @PutMapping("/users/me")
     public ResponseEntity<UserResponseDTO> updateProfile(
             Authentication authentication,
             @RequestBody UpdateProfileRequestDTO request) {
@@ -63,7 +66,8 @@ public class UserController {
         return ResponseEntity.ok(UserMapper.toResponseDTO(updatedUser));
     }
 
-    @GetMapping("/profile/{username}")
+    // VIEW PUBLIC PROFILE
+    @GetMapping("/users/profile/{username}")
     public ResponseEntity<PublicUserResponseDTO> getPublicProfile(
             @PathVariable String username) {
 
