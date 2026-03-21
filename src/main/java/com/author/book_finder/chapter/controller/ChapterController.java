@@ -34,7 +34,7 @@ public class ChapterController {
     }
 
     // LIST CHAPTERS FOR BOOK PUBLIC
-    @GetMapping("/book/{bookId}/chapters/list")
+    @GetMapping("/books/{bookId}/chapters/list")
     public ResponseEntity<Page<ChapterResponseDTO>> listChapters(
             @PathVariable Long bookId,
             Pageable pageable){

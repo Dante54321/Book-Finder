@@ -234,22 +234,33 @@ public class BookService {
                 request.getSize()
         );
 
-        // Normalize hashtags: trim + lowercase + remove # if needed
-        Set<String> cleanedHashtags = null;
+        // Normalize hashtags: trim, lowercase, remove '#'
+        List<String> cleanedHashtags = null;
         if (request.getHashtags() != null) {
             cleanedHashtags = request.getHashtags().stream()
                     .filter(Objects::nonNull)
                     .map(tag -> tag.trim().replaceAll("^#", "").toLowerCase())
                     .filter(tag -> !tag.isBlank())
-                    .collect(Collectors.toSet());
+                    .distinct()
+                    .toList();
         }
 
-        List<String> hashtagForSpec = cleanedHashtags == null ? null : new ArrayList<>(cleanedHashtags);
+        // Normalize genres (optional but keeps things consistent)
+        List<String> cleanedGenres = null;
+        if (request.getGenres() != null) {
+            cleanedGenres = request.getGenres().stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .map(String::toLowerCase)
+                    .filter(g -> !g.isBlank())
+                    .distinct()
+                    .toList();
+        }
 
         Specification<Book> spec = Specification
                 .where(BookSpecifications.keywordSearch(request.getKeyword()))
-                .and(BookSpecifications.hasGenres(request.getGenres()))
-                .and(BookSpecifications.hasHashtags(hashtagForSpec))
+                .and(BookSpecifications.hasGenres(cleanedGenres))
+                .and(BookSpecifications.hasHashtags(cleanedHashtags))
                 .and(BookSpecifications.belongsToSeries(request.getSeriesId()))
                 .and(BookSpecifications.belongsToSeriesName(request.getSeriesName()))
                 .and(BookSpecifications.belongsToUser(request.getUserId()))

@@ -61,7 +61,7 @@ public class SeriesController {
     }
 
     // GET MY SERIES
-    @GetMapping("/sereies/me")
+    @GetMapping("/series/me")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<SeriesResponseDTO>> getMySeries(Pageable pageable) {
 
@@ -80,7 +80,7 @@ public class SeriesController {
     }
 
     // UPDATE SERIES
-    @PutMapping("/sereies/{id}/update")
+    @PutMapping("/series/{id}/update")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<SeriesResponseDTO> updateSeries(
             @PathVariable Long id,
