@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.author.book_finder.enums.PublicationStatus;
+
 @Service
 public class ReviewService {
 
@@ -42,8 +44,7 @@ public class ReviewService {
     public ReviewResponseDTO createReview(Long bookId, ReviewCreateRequestDTO dto) {
         User currentUser = getCurrentUser();
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+        Book book = getPublishedBookOr404(bookId);
 
         if (reviewRepository.existsByUserAndBook(currentUser, book)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You already reviewed this book");
@@ -97,8 +98,7 @@ public class ReviewService {
     }
 
     public Page<ReviewResponseDTO> getReviewsForBook(Long bookId, Pageable pageable) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+        Book book = getPublishedBookOr404(bookId);
 
         Page<Review> reviewPage = reviewRepository.findByBook(book, pageable);
 
@@ -108,8 +108,7 @@ public class ReviewService {
     public ReviewResponseDTO getMyReviewForBook(Long bookId) {
         User currentUser = getCurrentUser();
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+        Book book = getPublishedBookOr404(bookId);
 
         Review review = reviewRepository.findByUserAndBook(currentUser, book)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
@@ -118,8 +117,7 @@ public class ReviewService {
     }
 
     public ReviewSummaryDTO getReviewSummaryForBook(Long bookId) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+        Book book = getPublishedBookOr404(bookId);
 
         long totalReviews = reviewRepository.countByBook(book);
         Double averageRating = reviewRepository.findAverageRatingByBook(book);
@@ -142,5 +140,11 @@ public class ReviewService {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private Book getPublishedBookOr404(Long bookId) {
+        return bookRepository
+                .findByBookIdAndPublicationStatus(bookId, PublicationStatus.PUBLISHED)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
     }
 }

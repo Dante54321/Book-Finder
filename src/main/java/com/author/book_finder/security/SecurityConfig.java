@@ -66,10 +66,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/chapters/list").permitAll()
 
                                 // USER PROFILE (PUBLIC)
-                                .requestMatchers(HttpMethod.GET, "/users/profile/*").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/users/profile/*").permitAll()
 
                                 // BOOK REVIEWS (PUBLIC)
-                                .requestMatchers(HttpMethod.GET, "/books/*/reviews").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/reviews").permitAll()
 
                                 .anyRequest().authenticated()
                 )

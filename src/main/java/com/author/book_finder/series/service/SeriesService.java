@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.author.book_finder.enums.FileType;
+import com.author.book_finder.enums.PublicationStatus;
+import java.util.Comparator;
+
+import com.author.book_finder.enums.PublicationStatus;
 
 
 import java.util.ArrayList;
@@ -178,7 +182,7 @@ public class SeriesService {
     // MAPPER
     private SeriesResponseDTO mapToResponseDTO(Series series) {
 
-        int totalBooks = series.getBooks() != null ? series.getBooks().size() : 0;
+        int totalBooks = getPublishedBooksInSeries(series).size();
 
         String coverUrl = null;
         if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
@@ -198,15 +202,16 @@ public class SeriesService {
 
     private SeriesDetailsDTO mapToDetailsDTO(Series series) {
 
+        List<Book> publishedBooks = getPublishedBooksInSeries(series);
+
         List<BooksInSeriesDTO> booksInSeries =
-                series.getBooks() == null ? List.of() :
-                        series.getBooks().stream()
-                                .map(book -> new BooksInSeriesDTO(
-                                        book.getBookId(),
-                                        book.getVolumeNumber(),
-                                        book.getTitle()
-                                ))
-                                .toList();
+                publishedBooks.stream()
+                        .map(book -> new BooksInSeriesDTO(
+                                book.getBookId(),
+                                book.getVolumeNumber(),
+                                book.getTitle()
+                        ))
+                        .toList();
 
         String coverUrl = null;
         if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
@@ -223,5 +228,13 @@ public class SeriesService {
                 booksInSeries,
                 coverUrl
         );
+    }
+
+    private List<Book> getPublishedBooksInSeries(Series series) {
+        return series.getBooks() == null ? List.of() :
+                series.getBooks().stream()
+                        .filter(book -> book.getPublicationStatus() == PublicationStatus.PUBLISHED)
+                        .sorted(Comparator.comparing(Book::getVolumeNumber, Comparator.nullsLast(Integer::compareTo)))
+                        .toList();
     }
 }

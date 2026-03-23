@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
+import com.author.book_finder.enums.PublicationStatus;
+
 
 @Service
 @Transactional
@@ -186,19 +188,24 @@ public class ChapterService {
 
     public Page<ChapterResponseDTO> listChaptersForBook(Long bookId, Pageable pageable) {
 
+        Book book = bookRepo.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        ensurePublished(book);
+
         Page<Chapter> chapterPage =
                 chapterRepo.findByBookBookIdOrderByChapterNumberAsc(bookId, pageable);
 
-        return chapterPage.map(ch ->
-            mapToResponseDTO(ch,null,null)
-        );
+        return chapterPage.map(ch -> mapToResponseDTO(ch, null, null));
     }
 
     public ChapterResponseDTO getPreviewUrl(Long id) {
         Chapter ch = chapterRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found"));
 
-        if (ch.getChapterNumber() != 1) {
+        ensurePublished(ch.getBook());
+
+        if (!ch.isPreview()) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "Chapter not available as preview");
@@ -212,6 +219,8 @@ public class ChapterService {
     public ChapterResponseDTO getFullUrl(Long id) {
         Chapter ch = chapterRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chapter not found"));
+
+        ensurePublishedOrOwner(ch.getBook());
 
         String fullUrl = s3Service.generatePresignedUrl(ch.getS3Key(), 60);
 
@@ -248,5 +257,24 @@ public class ChapterService {
                 fullUrl
         );
 
+    }
+
+    private void ensurePublished(Book book) {
+        if (book.getPublicationStatus() != PublicationStatus.PUBLISHED) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+        }
+    }
+
+    private void ensurePublishedOrOwner(Book book) {
+        if (book.getPublicationStatus() == PublicationStatus.PUBLISHED) {
+            return;
+        }
+
+        Long currentUserId = securityUtil.getCurrentUserId();
+        boolean isAdmin = securityUtil.isAdmin();
+
+        if (!book.getUser().getUserId().equals(currentUserId) && !isAdmin) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found");
+        }
     }
 }

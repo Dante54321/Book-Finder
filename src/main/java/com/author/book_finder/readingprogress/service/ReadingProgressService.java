@@ -19,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.author.book_finder.enums.PublicationStatus;
+
 @Service
 @Transactional
 public class ReadingProgressService {
@@ -44,7 +46,10 @@ public class ReadingProgressService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Book book = bookRepository.findById(requestDTO.getBookId())
+        Book book = bookRepository.findByBookIdAndPublicationStatus(
+                        requestDTO.getBookId(),
+                        PublicationStatus.PUBLISHED
+                )
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
         LocalDateTime now = LocalDateTime.now();

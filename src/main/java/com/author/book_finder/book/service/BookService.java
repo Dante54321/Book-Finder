@@ -120,7 +120,8 @@ public class BookService {
     // GET PRESIGNED URL FOR EXISTING BOOK COVER
     public String getCoverUrl(Long bookId) {
 
-        Book book = bookRepository.findById(bookId)
+        Book book = bookRepository
+                .findByBookIdAndPublicationStatus(bookId, PublicationStatus.PUBLISHED)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
         if (book.getCoverImageKey() == null || book.getCoverImageKey().isBlank()) {
