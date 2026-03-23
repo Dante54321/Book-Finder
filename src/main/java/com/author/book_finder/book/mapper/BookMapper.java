@@ -36,7 +36,8 @@ public class BookMapper {
                 book.getSeries() != null
                         ? book.getSeries().getSeriesName()
                         : null,
-                coverUrl
+                coverUrl,
+                book.getPublicationStatus()
         );
     }
 
@@ -73,7 +74,8 @@ public class BookMapper {
                         : null,
                 genreNames,
                 hashtagNames,
-                coverUrl
+                coverUrl,
+                book.getPublicationStatus()
         );
     }
 }

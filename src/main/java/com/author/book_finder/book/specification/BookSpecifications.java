@@ -1,6 +1,7 @@
 package com.author.book_finder.book.specification;
 
 import com.author.book_finder.book.entity.Book;
+import com.author.book_finder.enums.PublicationStatus;
 import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.hashtag.entity.Hashtag;
 import jakarta.persistence.criteria.Join;
@@ -10,6 +11,14 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 
 public class BookSpecifications {
+
+    // Publication status filter
+    public static Specification<Book> hasPublicationStatus(PublicationStatus publicationStatus) {
+        return (root, query, cb) -> {
+            if (publicationStatus == null) return null;
+            return cb.equal(root.get("publicationStatus"), publicationStatus);
+        };
+    }
 
     // Keyword search (title + summary)
     public static Specification<Book> keywordSearch(String keyword) {

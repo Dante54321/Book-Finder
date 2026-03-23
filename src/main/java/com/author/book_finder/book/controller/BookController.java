@@ -11,6 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.core.Authentication;
+
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api")
@@ -86,5 +90,20 @@ public class BookController {
             @RequestBody SearchRequestDTO request) {
 
         return bookService.searchBooks(request);
+    }
+
+    @PutMapping("/books/{id}/publish")
+    public BookResponseDTO publishBook(@PathVariable Long id, Authentication authentication) {
+        return bookService.publishBook(id, authentication);
+    }
+
+    @PutMapping("/books/{id}/unpublish")
+    public BookResponseDTO unpublishBook(@PathVariable Long id, Authentication authentication) {
+        return bookService.unpublishBook(id, authentication);
+    }
+
+    @GetMapping("/books/me/published")
+    public List<BookResponseDTO> getMyPublishedBooks(Authentication authentication) {
+        return bookService.getMyPublishedBooks(authentication);
     }
 }

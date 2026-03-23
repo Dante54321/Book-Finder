@@ -9,6 +9,7 @@ import com.author.book_finder.book.specification.BookSpecifications;
 import com.author.book_finder.chapter.entity.Chapter;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.enums.FileType;
+import com.author.book_finder.enums.PublicationStatus;
 import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.genre.repository.GenreRepository;
 import com.author.book_finder.hashtag.entity.Hashtag;
@@ -31,6 +32,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication;
 
 
 @Service
@@ -78,6 +81,7 @@ public class BookService {
         book.setTitle(dto.getTitle());
         book.setSummary(dto.getSummary());
         book.setPublishDate(dto.getPublishDate());
+        book.setPublicationStatus(PublicationStatus.DRAFT);
 
         if (dto.getCoverImageKey() != null && !dto.getCoverImageKey().isBlank()) {
             book.setCoverImageKey(dto.getCoverImageKey());
@@ -128,17 +132,17 @@ public class BookService {
 
     // GET ALL (PAGINATED)
     public Page<BookResponseDTO> getAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable)
+        return bookRepository
+                .findByPublicationStatus(PublicationStatus.PUBLISHED, pageable)
                 .map(bookMapper::toResponseDTO);
     }
 
 
     // GET DETAILS
     public BookDetailsDTO getBookDetails(Long bookId) {
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() ->
-                        new BookNotFoundException(bookId));
+        Book book = bookRepository
+                .findByBookIdAndPublicationStatus(bookId, PublicationStatus.PUBLISHED)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
 
         return bookMapper.toDetailsDTO(book);
     }
@@ -264,7 +268,9 @@ public class BookService {
                 .and(BookSpecifications.belongsToSeries(request.getSeriesId()))
                 .and(BookSpecifications.belongsToSeriesName(request.getSeriesName()))
                 .and(BookSpecifications.belongsToUser(request.getUserId()))
-                .and(BookSpecifications.belongsToUserName(request.getAuthorName()));
+                .and(BookSpecifications.belongsToUserName(request.getAuthorName()))
+                .and(BookSpecifications.hasPublicationStatus(PublicationStatus.PUBLISHED));
+
 
         Page<Book> books = bookRepository.findAll(spec, pageable);
 
@@ -393,6 +399,55 @@ public class BookService {
         if (!book.getUser().getUserId().equals(currentUserId) && !isAdmin) {
             throw new BookAccessDeniedException();
         }
+    }
+    // PUBLISH / UNPUBLISH
+    public BookResponseDTO publishBook(Long bookId, Authentication authentication) {
+        String username = authentication.getName();
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        if (!book.getUser().getUsername().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this book");
+        }
+
+        book.setPublicationStatus(PublicationStatus.PUBLISHED);
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponseDTO(saved);
+    }
+    // UNPUBLISH
+    public BookResponseDTO unpublishBook(Long bookId, Authentication authentication) {
+        String username = authentication.getName();
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        if (!book.getUser().getUsername().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this book");
+        }
+
+        book.setPublicationStatus(PublicationStatus.DRAFT);
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponseDTO(saved);
+    }
+    // GET MY PUBLISHED BOOKS
+    @Transactional(readOnly = true)
+    public List<BookResponseDTO> getMyPublishedBooks(Authentication authentication) {
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Book> books = bookRepository.findByUser_UserIdAndPublicationStatusOrderByPublishDateDesc(
+                user.getUserId(),
+                PublicationStatus.PUBLISHED
+        );
+
+        return books.stream()
+                .map(bookMapper::toResponseDTO)
+                .toList();
     }
 
 }

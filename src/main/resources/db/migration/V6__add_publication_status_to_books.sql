@@ -1,0 +1,2 @@
+ALTER TABLE books
+    ADD COLUMN publication_status VARCHAR(50) NOT NULL DEFAULT 'DRAFT';

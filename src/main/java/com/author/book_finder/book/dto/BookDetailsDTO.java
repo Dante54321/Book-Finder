@@ -1,5 +1,7 @@
 package com.author.book_finder.book.dto;
 
+import com.author.book_finder.enums.PublicationStatus;
+
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -15,6 +17,7 @@ public class BookDetailsDTO {
     private Set<String> genres;
     private Set<String> hashtags;
     private String coverUrl;
+    private PublicationStatus publicationStatus;
 
     public BookDetailsDTO(Long bookId,
                           Integer volumeNumber,
@@ -25,7 +28,8 @@ public class BookDetailsDTO {
                           String seriesName,
                           Set<String> genres,
                           Set<String> hashtags,
-                          String coverUrl) {
+                          String coverUrl,
+                          PublicationStatus publicationStatus) {
         this.bookId = bookId;
         this.volumeNumber = volumeNumber;
         this.title = title;
@@ -36,6 +40,7 @@ public class BookDetailsDTO {
         this.genres = genres;
         this.hashtags = hashtags;
         this.coverUrl = coverUrl;
+        this.publicationStatus = publicationStatus;
     }
 
     public Long getBookId() {
@@ -112,5 +117,13 @@ public class BookDetailsDTO {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public PublicationStatus getPublicationStatus() {
+        return publicationStatus;
+    }
+
+    public void setPublicationStatus(PublicationStatus publicationStatus) {
+        this.publicationStatus = publicationStatus;
     }
 }

@@ -1,6 +1,7 @@
 package com.author.book_finder.book.entity;
 
 import com.author.book_finder.chapter.entity.Chapter;
+import com.author.book_finder.enums.PublicationStatus;
 import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.hashtag.entity.Hashtag;
 import com.author.book_finder.review.entity.Review;
@@ -9,6 +10,8 @@ import com.author.book_finder.user.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(
@@ -274,4 +277,18 @@ public class Book {
                 '}';
     }
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "publication_status", nullable = false)
+    private PublicationStatus publicationStatus;
+
+    public PublicationStatus getPublicationStatus() {
+        return publicationStatus;
+    }
+
+    public void setPublicationStatus(PublicationStatus publicationStatus) {
+        this.publicationStatus = publicationStatus;
+    }
+
 }
+
+
