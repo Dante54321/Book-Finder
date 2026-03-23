@@ -180,13 +180,19 @@ public class SeriesService {
 
         int totalBooks = series.getBooks() != null ? series.getBooks().size() : 0;
 
+        String coverUrl = null;
+        if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
+            coverUrl = s3Service.getPublicUrl(series.getCoverImageKey());
+        }
+
         return new SeriesResponseDTO(
                 series.getSeriesId(),
                 series.getSeriesName(),
                 series.getDescription(),
                 series.getPublishDate(),
                 series.getUser().getUsername(),
-                totalBooks
+                totalBooks,
+                coverUrl
         );
     }
 
@@ -202,6 +208,11 @@ public class SeriesService {
                                 ))
                                 .toList();
 
+        String coverUrl = null;
+        if (series.getCoverImageKey() != null && !series.getCoverImageKey().isBlank()) {
+            coverUrl = s3Service.getPublicUrl(series.getCoverImageKey());
+        }
+
         return new SeriesDetailsDTO(
                 series.getSeriesId(),
                 series.getSeriesName(),
@@ -209,7 +220,8 @@ public class SeriesService {
                 series.getPublishDate(),
                 series.getUser().getUsername(),
                 booksInSeries.size(),
-                booksInSeries
+                booksInSeries,
+                coverUrl
         );
     }
 }

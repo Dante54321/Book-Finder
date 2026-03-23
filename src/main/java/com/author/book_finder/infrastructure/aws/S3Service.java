@@ -20,6 +20,9 @@ public class S3Service {
     @Value("${aws.s3.bucket}")
     private String bucket;
 
+    @Value("${aws.region}")
+    private String region;
+
     private final S3Client s3Client;
     private final S3Presigner presigner;
 
@@ -96,5 +99,14 @@ public class S3Service {
                 .build();
 
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    // Get Public URL (for direct access, not presigned)
+    public String getPublicUrl(String key) {
+        if (key == null || key.isBlank()) {
+            return null;
+        }
+
+        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }
 }

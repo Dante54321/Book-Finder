@@ -123,7 +123,7 @@ public class BookService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cover not found");
         }
 
-        return s3Service.generatePresignedUrl(book.getCoverImageKey(), 60);
+        return s3Service.getPublicUrl(book.getCoverImageKey());
     }
 
     // GET ALL (PAGINATED)

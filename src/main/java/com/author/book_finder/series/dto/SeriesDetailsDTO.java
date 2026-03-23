@@ -9,6 +9,7 @@ public class SeriesDetailsDTO {
     private String seriesName;
     private String seriesDescription;
     private LocalDate publishDate;
+    private String coverUrl;
 
     private String authorUsername;
     private int totalBooks;
@@ -20,7 +21,8 @@ public class SeriesDetailsDTO {
                             LocalDate publishDate,
                             String authorUsername,
                             int totalBooks,
-                            List<BooksInSeriesDTO> booksInSeries) {
+                            List<BooksInSeriesDTO> booksInSeries,
+                            String coverUrl) {
         this.seriesId = seriesId;
         this.seriesName = seriesName;
         this.seriesDescription = seriesDescription;
@@ -28,6 +30,7 @@ public class SeriesDetailsDTO {
         this.authorUsername = authorUsername;
         this.totalBooks = totalBooks;
         this.booksInSeries = booksInSeries;
+        this.coverUrl = coverUrl;
     }
 
     public Long getSeriesId() {
@@ -84,5 +87,13 @@ public class SeriesDetailsDTO {
 
     public void setBooksInSeries(List<BooksInSeriesDTO> booksInSeries) {
         this.booksInSeries = booksInSeries;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 }

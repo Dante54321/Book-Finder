@@ -5,6 +5,7 @@ import com.author.book_finder.book.dto.BookResponseDTO;
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.hashtag.entity.Hashtag;
+import com.author.book_finder.infrastructure.aws.S3Service;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -13,7 +14,18 @@ import java.util.stream.Collectors;
 @Component
 public class BookMapper {
 
+    private final S3Service s3Service;
+
+    public BookMapper(S3Service s3Service) {
+        this.s3Service = s3Service;
+    }
+
     public BookResponseDTO toResponseDTO(Book book) {
+
+        String coverUrl = null;
+        if (book.getCoverImageKey() != null && !book.getCoverImageKey().isBlank()) {
+            coverUrl = s3Service.getPublicUrl(book.getCoverImageKey());
+        }
 
         return new BookResponseDTO(
                 book.getBookId(),
@@ -23,7 +35,8 @@ public class BookMapper {
                 book.getUser().getUsername(),
                 book.getSeries() != null
                         ? book.getSeries().getSeriesName()
-                        : null
+                        : null,
+                coverUrl
         );
     }
 
@@ -43,6 +56,11 @@ public class BookMapper {
                 .map(Hashtag::getHashtag)
                 .collect(Collectors.toSet());
 
+        String coverUrl = null;
+        if (book.getCoverImageKey() != null && !book.getCoverImageKey().isBlank()) {
+            coverUrl = s3Service.getPublicUrl(book.getCoverImageKey());
+        }
+
         return new BookDetailsDTO(
                 book.getBookId(),
                 book.getVolumeNumber(),
@@ -54,7 +72,8 @@ public class BookMapper {
                         ? book.getSeries().getSeriesName()
                         : null,
                 genreNames,
-                hashtagNames
+                hashtagNames,
+                coverUrl
         );
     }
 }

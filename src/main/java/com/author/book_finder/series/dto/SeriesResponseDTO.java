@@ -8,6 +8,7 @@ public class SeriesResponseDTO {
     private String seriesName;
     private String description;
     private LocalDate publishDate;
+    private String coverUrl;
 
     private String authorUsername;
     private int totalBooks;
@@ -17,13 +18,15 @@ public class SeriesResponseDTO {
                              String description,
                              LocalDate publishDate,
                              String authorUsername,
-                             int totalBooks) {
+                             int totalBooks,
+                             String coverUrl) {
         this.seriesId = seriesId;
         this.seriesName = seriesName;
         this.description = description;
         this.publishDate = publishDate;
         this.authorUsername = authorUsername;
         this.totalBooks = totalBooks;
+        this.coverUrl = coverUrl;
     }
 
     public Long getSeriesId() {
@@ -72,5 +75,13 @@ public class SeriesResponseDTO {
 
     public void setTotalBooks(int totalBooks) {
         this.totalBooks = totalBooks;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 }
