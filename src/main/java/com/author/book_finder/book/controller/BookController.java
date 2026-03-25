@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api")
 public class BookController {
@@ -30,7 +29,7 @@ public class BookController {
     @PostMapping("/books/create")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookResponseDTO> createBook(
-           @Valid @RequestBody BookCreateRequestDTO dto
+            @Valid @RequestBody BookCreateRequestDTO dto
     ) {
         return ResponseEntity.ok(bookService.createBook(dto));
     }
@@ -58,10 +57,16 @@ public class BookController {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
 
-    // GET BOOK DETAILS PUBLIC
+    // GET BOOK DETAILS
     @GetMapping("/books/{id}/details")
     public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookDetails(id));
+    }
+
+    // GET ALL MY BOOKS
+    @GetMapping("/books/me")
+    public ResponseEntity<List<BookResponseDTO>> getMyBooks(Authentication authentication) {
+        return ResponseEntity.ok(bookService.getMyBooks(authentication));
     }
 
     // UPDATE BOOK
@@ -81,7 +86,6 @@ public class BookController {
 
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
-
     }
 
     // SEARCH FEATURE

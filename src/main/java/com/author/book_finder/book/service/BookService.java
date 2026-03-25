@@ -14,11 +14,12 @@ import com.author.book_finder.genre.entity.Genre;
 import com.author.book_finder.genre.repository.GenreRepository;
 import com.author.book_finder.hashtag.entity.Hashtag;
 import com.author.book_finder.hashtag.repository.HashtagRepository;
+import com.author.book_finder.infrastructure.aws.S3Service;
 import com.author.book_finder.search.dto.SearchRequestDTO;
 import com.author.book_finder.security.SecurityUtil;
+import com.author.book_finder.security.UserDetailsImpl;
 import com.author.book_finder.series.entity.Series;
 import com.author.book_finder.series.repository.SeriesRepository;
-import com.author.book_finder.infrastructure.aws.S3Service;
 import com.author.book_finder.user.entity.User;
 import com.author.book_finder.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -26,15 +27,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.springframework.security.core.Authentication;
-
 
 @Service
 @Transactional
@@ -67,7 +67,6 @@ public class BookService {
         this.s3Service = s3Service;
     }
 
-
     // CREATE BOOK
     public BookResponseDTO createBook(BookCreateRequestDTO dto) {
 
@@ -86,6 +85,7 @@ public class BookService {
         if (dto.getCoverImageKey() != null && !dto.getCoverImageKey().isBlank()) {
             book.setCoverImageKey(dto.getCoverImageKey());
         }
+
         author.addBook(book);
 
         attachSeries(book, dto.getSeriesId());
@@ -138,16 +138,32 @@ public class BookService {
                 .map(bookMapper::toResponseDTO);
     }
 
-
     // GET DETAILS
     public BookDetailsDTO getBookDetails(Long bookId) {
-        Book book = bookRepository
-                .findByBookIdAndPublicationStatus(bookId, PublicationStatus.PUBLISHED)
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        if (book.getPublicationStatus() != PublicationStatus.PUBLISHED && !canCurrentUserManageBook(book)) {
+            throw new BookNotFoundException(bookId);
+        }
 
         return bookMapper.toDetailsDTO(book);
     }
 
+    // GET ALL MY BOOKS
+    @Transactional(readOnly = true)
+    public List<BookResponseDTO> getMyBooks(Authentication authentication) {
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Book> books = bookRepository.findByUser_UserIdOrderByPublishDateDesc(user.getUserId());
+
+        return books.stream()
+                .map(bookMapper::toResponseDTO)
+                .toList();
+    }
 
     // UPDATE BOOK
     public BookResponseDTO updateBook(Long id, BookUpdateRequestDTO dto) {
@@ -157,7 +173,6 @@ public class BookService {
 
         validateOwnership(book);
 
-        // Partial updates
         if (dto.getTitle() != null) {
             book.setTitle(dto.getTitle());
         }
@@ -199,7 +214,6 @@ public class BookService {
         return bookMapper.toResponseDTO(updated);
     }
 
-
     // DELETE BOOK
     public void deleteBook(Long bookId) {
 
@@ -208,24 +222,20 @@ public class BookService {
 
         validateOwnership(book);
 
-        // Delete chapter files from S3
         for (Chapter chapter : book.getChapters()) {
             if (chapter.getS3Key() != null && !chapter.getS3Key().isBlank()) {
                 s3Service.deleteObject(chapter.getS3Key());
             }
         }
 
-        // Delete book cover image
         if (book.getCoverImageKey() != null && !book.getCoverImageKey().isBlank()) {
             s3Service.deleteObject(book.getCoverImageKey());
         }
 
         Series series = book.getSeries();
 
-        // Remove book from user
         book.getUser().removeBook(book);
 
-        // Renumber series AFTER removal
         if (series != null) {
             renumberVolumesInSeries(series);
         }
@@ -239,7 +249,6 @@ public class BookService {
                 request.getSize()
         );
 
-        // Normalize hashtags: trim, lowercase, remove '#'
         List<String> cleanedHashtags = null;
         if (request.getHashtags() != null) {
             cleanedHashtags = request.getHashtags().stream()
@@ -250,7 +259,6 @@ public class BookService {
                     .toList();
         }
 
-        // Normalize genres (optional but keeps things consistent)
         List<String> cleanedGenres = null;
         if (request.getGenres() != null) {
             cleanedGenres = request.getGenres().stream()
@@ -272,7 +280,6 @@ public class BookService {
                 .and(BookSpecifications.belongsToUserName(request.getAuthorName()))
                 .and(BookSpecifications.hasPublicationStatus(PublicationStatus.PUBLISHED));
 
-
         Page<Book> books = bookRepository.findAll(spec, pageable);
 
         return books.map(bookMapper::toResponseDTO);
@@ -281,9 +288,7 @@ public class BookService {
     // HELPER METHODS
     private void attachSeries(Book book, Long seriesId) {
 
-        // Removing series (standalone book)
         if (seriesId == null) {
-
             Series oldSeries = book.getSeries();
 
             if (oldSeries != null) {
@@ -300,7 +305,6 @@ public class BookService {
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Series not found")
                 );
 
-        // OWNERSHIP VALIDATION
         Long currentUserId = securityUtil.getCurrentUserId();
         if (!series.getUser().getUserId().equals(currentUserId)
                 && !securityUtil.isAdmin()) {
@@ -310,7 +314,6 @@ public class BookService {
             );
         }
 
-        // If already in same series do nothing
         if (book.getSeries() != null &&
                 book.getSeries().getSeriesId().equals(seriesId)) {
             return;
@@ -318,21 +321,15 @@ public class BookService {
 
         Series oldSeries = book.getSeries();
 
-        // If switching series remove from old one
         if (oldSeries != null) {
             oldSeries.removeBook(book);
             renumberVolumesInSeries(oldSeries);
         }
 
-        // Attach Series to Book
         book.setVolumeNumber(null);
-
         series.addBook(book);
-
         renumberVolumesInSeries(series);
-
     }
-
 
     private void attachGenres(Book book, Set<Long> genreIds) {
 
@@ -391,6 +388,26 @@ public class BookService {
         }
     }
 
+    private boolean canCurrentUserManageBook(Book book) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null) {
+            return false;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof UserDetailsImpl userDetails)) {
+            return false;
+        }
+
+        if (securityUtil.isAdmin()) {
+            return true;
+        }
+
+        return book.getUser().getUserId().equals(userDetails.getUserId());
+    }
+
     // VALIDATE OWNERSHIP (ADMIN BYPASS)
     private void validateOwnership(Book book) {
 
@@ -401,6 +418,7 @@ public class BookService {
             throw new BookAccessDeniedException();
         }
     }
+
     // PUBLISH / UNPUBLISH
     public BookResponseDTO publishBook(Long bookId, Authentication authentication) {
         String username = authentication.getName();
@@ -417,6 +435,7 @@ public class BookService {
         Book saved = bookRepository.save(book);
         return bookMapper.toResponseDTO(saved);
     }
+
     // UNPUBLISH
     public BookResponseDTO unpublishBook(Long bookId, Authentication authentication) {
         String username = authentication.getName();
@@ -433,6 +452,7 @@ public class BookService {
         Book saved = bookRepository.save(book);
         return bookMapper.toResponseDTO(saved);
     }
+
     // GET MY PUBLISHED BOOKS
     @Transactional(readOnly = true)
     public List<BookResponseDTO> getMyPublishedBooks(Authentication authentication) {
@@ -496,5 +516,4 @@ public class BookService {
         Book saved = bookRepository.save(book);
         return bookMapper.toResponseDTO(saved);
     }
-
 }

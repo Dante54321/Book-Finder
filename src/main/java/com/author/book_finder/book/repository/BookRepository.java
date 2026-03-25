@@ -47,6 +47,8 @@ public interface BookRepository extends
 
     List<Book> findBySeriesOrderByVolumeNumberAsc(Series series);
 
+    List<Book> findByUser_UserIdOrderByPublishDateDesc(Long userId);
+
     // Specification Search Optimization
     @EntityGraph(attributePaths = {"user", "series"})
     Page<Book> findAll(Specification<Book> spec, Pageable pageable);
