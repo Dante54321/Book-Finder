@@ -61,6 +61,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/cover").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/books/search").permitAll()
 
+                                // GENRES (PUBLIC)
+                                .requestMatchers(HttpMethod.GET, "/api/genres").permitAll()
+
                                 // BROWSE CHAPTER (PUBLIC) VIEW PREVIEW CHAPTER (PUBLIC)
                                 .requestMatchers(HttpMethod.GET, "/api/chapters/*/preview").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/chapters/list").permitAll()
