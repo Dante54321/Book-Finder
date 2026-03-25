@@ -2,30 +2,33 @@ package com.author.book_finder.series.service;
 
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.book.service.BookService;
+import com.author.book_finder.enums.FileType;
+import com.author.book_finder.enums.PublicationStatus;
 import com.author.book_finder.infrastructure.aws.S3Service;
-import com.author.book_finder.series.dto.*;
-import com.author.book_finder.series.entity.Series;
-import com.author.book_finder.user.entity.User;
-import com.author.book_finder.series.repository.SeriesRepository;
-import com.author.book_finder.user.repository.UserRepository;
 import com.author.book_finder.security.SecurityUtil;
+import com.author.book_finder.security.UserDetailsImpl;
+import com.author.book_finder.series.dto.BooksInSeriesDTO;
+import com.author.book_finder.series.dto.PresignedUploadResponseDTO;
+import com.author.book_finder.series.dto.SeriesCreateRequestDTO;
+import com.author.book_finder.series.dto.SeriesDetailsDTO;
+import com.author.book_finder.series.dto.SeriesResponseDTO;
+import com.author.book_finder.series.entity.Series;
+import com.author.book_finder.series.repository.SeriesRepository;
+import com.author.book_finder.user.entity.User;
+import com.author.book_finder.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.author.book_finder.enums.FileType;
-import com.author.book_finder.enums.PublicationStatus;
-import java.util.Comparator;
-
-import com.author.book_finder.enums.PublicationStatus;
-
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-
 
 @Service
 @Transactional
@@ -37,7 +40,11 @@ public class SeriesService {
     private final S3Service s3Service;
     private final BookService bookService;
 
-    public SeriesService(SeriesRepository seriesRepository, UserRepository userRepository, SecurityUtil securityUtil, S3Service s3Service, BookService bookService) {
+    public SeriesService(SeriesRepository seriesRepository,
+                         UserRepository userRepository,
+                         SecurityUtil securityUtil,
+                         S3Service s3Service,
+                         BookService bookService) {
         this.seriesRepository = seriesRepository;
         this.userRepository = userRepository;
         this.securityUtil = securityUtil;
@@ -89,7 +96,7 @@ public class SeriesService {
         );
     }
 
-    // GET PRESIGNED URL FOR EXISTING SERIES COVER
+    // GET COVER URL
     public String getCoverUrl(Long seriesId) {
 
         Series series = seriesRepository.findById(seriesId)
@@ -115,7 +122,7 @@ public class SeriesService {
         return seriesRepository.findByUser_UserId(userId, pageable).map(this::mapToResponseDTO);
     }
 
-    // GET SERIES DETAILS PUBLIC
+    // GET SERIES DETAILS
     public SeriesDetailsDTO getSeriesDetails(Long seriesId) {
 
         Series series = seriesRepository.findById(seriesId)
@@ -179,7 +186,7 @@ public class SeriesService {
         }
     }
 
-    // MAPPER
+    // RESPONSE DTO (public list behavior stays published-only)
     private SeriesResponseDTO mapToResponseDTO(Series series) {
 
         int totalBooks = getPublishedBooksInSeries(series).size();
@@ -200,12 +207,13 @@ public class SeriesService {
         );
     }
 
+    // DETAILS DTO (owner/admin can see drafts too)
     private SeriesDetailsDTO mapToDetailsDTO(Series series) {
 
-        List<Book> publishedBooks = getPublishedBooksInSeries(series);
+        List<Book> visibleBooks = getVisibleBooksInSeries(series);
 
         List<BooksInSeriesDTO> booksInSeries =
-                publishedBooks.stream()
+                visibleBooks.stream()
                         .map(book -> new BooksInSeriesDTO(
                                 book.getBookId(),
                                 book.getVolumeNumber(),
@@ -230,11 +238,49 @@ public class SeriesService {
         );
     }
 
+    private List<Book> getVisibleBooksInSeries(Series series) {
+        List<Book> allBooks = getAllBooksInSeries(series);
+
+        if (canCurrentUserManageSeries(series)) {
+            return allBooks;
+        }
+
+        return allBooks.stream()
+                .filter(book -> book.getPublicationStatus() == PublicationStatus.PUBLISHED)
+                .toList();
+    }
+
     private List<Book> getPublishedBooksInSeries(Series series) {
-        return series.getBooks() == null ? List.of() :
-                series.getBooks().stream()
-                        .filter(book -> book.getPublicationStatus() == PublicationStatus.PUBLISHED)
-                        .sorted(Comparator.comparing(Book::getVolumeNumber, Comparator.nullsLast(Integer::compareTo)))
-                        .toList();
+        return getAllBooksInSeries(series).stream()
+                .filter(book -> book.getPublicationStatus() == PublicationStatus.PUBLISHED)
+                .toList();
+    }
+
+    private List<Book> getAllBooksInSeries(Series series) {
+        return series.getBooks() == null
+                ? List.of()
+                : series.getBooks().stream()
+                .sorted(Comparator.comparing(Book::getVolumeNumber, Comparator.nullsLast(Integer::compareTo)))
+                .toList();
+    }
+
+    private boolean canCurrentUserManageSeries(Series series) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null) {
+            return false;
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof UserDetailsImpl userDetails)) {
+            return false;
+        }
+
+        if (securityUtil.isAdmin()) {
+            return true;
+        }
+
+        return series.getUser().getUserId().equals(userDetails.getUserId());
     }
 }
