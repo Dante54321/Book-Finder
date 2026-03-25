@@ -43,6 +43,13 @@ public class BookMapper {
 
     public BookDetailsDTO toDetailsDTO(Book book) {
 
+        Set<Long> genreIds = book.getGenres() == null
+                ? Set.of()
+                : book.getGenres()
+                .stream()
+                .map(Genre::getGenreId)
+                .collect(Collectors.toSet());
+
         Set<String> genreNames = book.getGenres() == null
                 ? Set.of()
                 : book.getGenres()
@@ -69,9 +76,9 @@ public class BookMapper {
                 book.getSummary(),
                 book.getPublishDate(),
                 book.getUser().getUsername(),
-                book.getSeries() != null
-                        ? book.getSeries().getSeriesName()
-                        : null,
+                book.getSeries() != null ? book.getSeries().getSeriesId() : null,
+                book.getSeries() != null ? book.getSeries().getSeriesName() : null,
+                genreIds,
                 genreNames,
                 hashtagNames,
                 coverUrl,

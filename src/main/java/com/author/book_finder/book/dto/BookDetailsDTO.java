@@ -13,9 +13,14 @@ public class BookDetailsDTO {
     private String summary;
     private LocalDate publishDate;
     private String authorUsername;
+
+    private Long seriesId;
     private String seriesName;
+
+    private Set<Long> genreIds;
     private Set<String> genres;
     private Set<String> hashtags;
+
     private String coverUrl;
     private PublicationStatus publicationStatus;
 
@@ -25,7 +30,9 @@ public class BookDetailsDTO {
                           String summary,
                           LocalDate publishDate,
                           String authorUsername,
+                          Long seriesId,
                           String seriesName,
+                          Set<Long> genreIds,
                           Set<String> genres,
                           Set<String> hashtags,
                           String coverUrl,
@@ -36,7 +43,9 @@ public class BookDetailsDTO {
         this.summary = summary;
         this.publishDate = publishDate;
         this.authorUsername = authorUsername;
+        this.seriesId = seriesId;
         this.seriesName = seriesName;
+        this.genreIds = genreIds;
         this.genres = genres;
         this.hashtags = hashtags;
         this.coverUrl = coverUrl;
@@ -91,12 +100,28 @@ public class BookDetailsDTO {
         this.authorUsername = authorUsername;
     }
 
+    public Long getSeriesId() {
+        return seriesId;
+    }
+
+    public void setSeriesId(Long seriesId) {
+        this.seriesId = seriesId;
+    }
+
     public String getSeriesName() {
         return seriesName;
     }
 
     public void setSeriesName(String seriesName) {
         this.seriesName = seriesName;
+    }
+
+    public Set<Long> getGenreIds() {
+        return genreIds;
+    }
+
+    public void setGenreIds(Set<Long> genreIds) {
+        this.genreIds = genreIds;
     }
 
     public Set<String> getGenres() {
@@ -113,6 +138,10 @@ public class BookDetailsDTO {
 
     public void setHashtags(Set<String> hashtags) {
         this.hashtags = hashtags;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
     }
 
     public void setCoverUrl(String coverUrl) {
