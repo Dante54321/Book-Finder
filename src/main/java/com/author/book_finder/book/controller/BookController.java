@@ -106,4 +106,24 @@ public class BookController {
     public List<BookResponseDTO> getMyPublishedBooks(Authentication authentication) {
         return bookService.getMyPublishedBooks(authentication);
     }
+
+    @GetMapping("/books/me/standalone")
+    public List<BookResponseDTO> getMyStandaloneBooks(Authentication authentication) {
+        return bookService.getMyStandaloneBooks(authentication);
+    }
+
+    @PutMapping("/books/{id}/assign-series/{seriesId}")
+    public BookResponseDTO assignBookToSeries(
+            @PathVariable Long id,
+            @PathVariable Long seriesId,
+            Authentication authentication) {
+        return bookService.assignBookToSeries(id, seriesId, authentication);
+    }
+
+    @PutMapping("/books/{id}/remove-series")
+    public BookResponseDTO removeBookFromSeries(
+            @PathVariable Long id,
+            Authentication authentication) {
+        return bookService.removeBookFromSeries(id, authentication);
+    }
 }

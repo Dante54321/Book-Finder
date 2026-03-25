@@ -89,6 +89,8 @@ public interface BookRepository extends
     Page<Book> findByPublicationStatus(PublicationStatus publicationStatus, Pageable pageable);
 
     Optional<Book> findByBookIdAndPublicationStatus(Long bookId, PublicationStatus publicationStatus);
+
+    List<Book> findByUser_UserIdAndSeriesIsNullOrderByPublishDateDesc(Long userId);
 }
 
 

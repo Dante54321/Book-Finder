@@ -451,4 +451,50 @@ public class BookService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<BookResponseDTO> getMyStandaloneBooks(Authentication authentication) {
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        List<Book> books = bookRepository.findByUser_UserIdAndSeriesIsNullOrderByPublishDateDesc(user.getUserId());
+
+        return books.stream()
+                .map(bookMapper::toResponseDTO)
+                .toList();
+    }
+
+    public BookResponseDTO assignBookToSeries(Long bookId, Long seriesId, Authentication authentication) {
+        String username = authentication.getName();
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        if (!book.getUser().getUsername().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this book");
+        }
+
+        attachSeries(book, seriesId);
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponseDTO(saved);
+    }
+
+    public BookResponseDTO removeBookFromSeries(Long bookId, Authentication authentication) {
+        String username = authentication.getName();
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        if (!book.getUser().getUsername().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this book");
+        }
+
+        attachSeries(book, null);
+
+        Book saved = bookRepository.save(book);
+        return bookMapper.toResponseDTO(saved);
+    }
+
 }
