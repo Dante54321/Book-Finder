@@ -3,6 +3,8 @@ package com.author.book_finder.infrastructure.aws;
 import com.author.book_finder.enums.FileType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -11,8 +13,8 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-
 
 @Service
 public class S3Service {
@@ -26,7 +28,7 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Presigner presigner;
 
-    public S3Service (S3Client s3Client, S3Presigner presigner) {
+    public S3Service(S3Client s3Client, S3Presigner presigner) {
         this.s3Client = s3Client;
         this.presigner = presigner;
     }
@@ -68,9 +70,33 @@ public class S3Service {
         return presignedRequest.url().toExternalForm();
     }
 
+    // Read text object
+    public String getObjectAsString(String key) {
+        GetObjectRequest request = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        ResponseBytes<GetObjectResponse> responseBytes = s3Client.getObjectAsBytes(request);
+        return responseBytes.asString(StandardCharsets.UTF_8);
+    }
+
+    // Write text object
+    public void putTextObject(String key, String content, FileType fileType) {
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(fileType.getMimeType())
+                .build();
+
+        s3Client.putObject(
+                request,
+                RequestBody.fromString(content == null ? "" : content, StandardCharsets.UTF_8)
+        );
+    }
+
     // Check If Object Exists
     public boolean objectExists(String key) {
-
         try {
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bucket)
@@ -79,9 +105,8 @@ public class S3Service {
 
             s3Client.headObject(headObjectRequest);
             return true;
-        }  catch (S3Exception e) {
-
-            if  (e.statusCode() == 404) {
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
                 return false;
             }
 
@@ -89,10 +114,8 @@ public class S3Service {
         }
     }
 
-
     // Delete Object
     public void deleteObject(String key) {
-
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
