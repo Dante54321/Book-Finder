@@ -73,6 +73,7 @@ public class SecurityConfig {
 
                                 // BOOK REVIEWS (PUBLIC)
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/reviews").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/*/reviews/summary").permitAll()
 
                                 .anyRequest().authenticated()
                 )

@@ -1,5 +1,7 @@
 package com.author.book_finder.review.controller;
 
+import com.author.book_finder.review.dto.ReviewSummaryDTO;
+
 import com.author.book_finder.review.dto.ReviewCreateRequestDTO;
 import com.author.book_finder.review.dto.ReviewResponseDTO;
 import com.author.book_finder.review.dto.ReviewUpdateRequestDTO;
@@ -67,5 +69,12 @@ public class ReviewController {
     ) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/books/{bookId}/reviews/summary")
+    public ResponseEntity<ReviewSummaryDTO> getReviewSummaryForBook(
+            @PathVariable Long bookId
+    ) {
+        return ResponseEntity.ok(reviewService.getReviewSummaryForBook(bookId));
     }
 }
