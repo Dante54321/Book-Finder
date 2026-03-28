@@ -1,9 +1,14 @@
 package com.author.book_finder.user.service;
 
+import com.author.book_finder.book.dto.BookResponseDTO;
+import com.author.book_finder.book.mapper.BookMapper;
+import com.author.book_finder.book.repository.BookRepository;
+import com.author.book_finder.enums.PublicationStatus;
+import com.author.book_finder.user.dto.PublicUserResponseDTO;
+import com.author.book_finder.user.dto.UserResponseDTO;
 import com.author.book_finder.user.entity.User;
-import com.author.book_finder.user.repository.UserRepository;
 import com.author.book_finder.user.mapper.UserMapper;
-
+import com.author.book_finder.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,11 +23,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
 
     public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       BookRepository bookRepository,
+                       BookMapper bookMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.bookRepository = bookRepository;
+        this.bookMapper = bookMapper;
     }
 
     public User getById(Long id) {
@@ -41,18 +52,30 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User updateCurrentUser(String username,
-                              String bio,
-                              String firstName,
-                              String lastName) {
+    @Transactional(readOnly = true)
+    public UserResponseDTO getCurrentUserProfile(String username) {
+        User user = getByUsername(username);
+        return UserMapper.toResponseDTO(user, getPublishedBooksForUser(user.getUserId()));
+    }
+
+    @Transactional(readOnly = true)
+    public PublicUserResponseDTO getPublicProfile(String username) {
+        User user = getByUsername(username);
+        return UserMapper.toPublicResponseDTO(user, getPublishedBooksForUser(user.getUserId()));
+    }
+
+    public UserResponseDTO updateCurrentUserProfile(String username,
+                                                    String bio,
+                                                    String firstName,
+                                                    String lastName) {
 
         User user = getByUsername(username);
 
-        user.setBio(bio);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
+        user.setBio(normalizeText(bio));
+        user.setFirstName(normalizeText(firstName));
+        user.setLastName(normalizeText(lastName));
 
-        return user;
+        return UserMapper.toResponseDTO(user, getPublishedBooksForUser(user.getUserId()));
     }
 
     public void changePassword(Long userId,
@@ -94,6 +117,23 @@ public class UserService {
         }
 
         user.setBanned(false);
+    }
 
+    private List<BookResponseDTO> getPublishedBooksForUser(Long userId) {
+        return bookRepository.findByUser_UserIdAndPublicationStatusOrderByPublishDateDesc(
+                        userId,
+                        PublicationStatus.PUBLISHED
+                ).stream()
+                .map(bookMapper::toResponseDTO)
+                .toList();
+    }
+
+    private String normalizeText(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isBlank() ? null : trimmed;
     }
 }

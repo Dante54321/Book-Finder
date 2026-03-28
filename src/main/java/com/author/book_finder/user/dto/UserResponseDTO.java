@@ -1,6 +1,9 @@
 package com.author.book_finder.user.dto;
 
+import com.author.book_finder.book.dto.BookResponseDTO;
+
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 public class UserResponseDTO {
@@ -14,6 +17,7 @@ public class UserResponseDTO {
     private LocalDate joinDate;
     private boolean isBanned;
     private Set<String> roles;
+    private List<BookResponseDTO> books;
 
     public UserResponseDTO(Long id,
                            String username,
@@ -23,7 +27,8 @@ public class UserResponseDTO {
                            String lastName,
                            LocalDate joinDate,
                            boolean isBanned,
-                           Set<String> roles) {
+                           Set<String> roles,
+                           List<BookResponseDTO> books) {
 
         this.id = id;
         this.username = username;
@@ -34,6 +39,7 @@ public class UserResponseDTO {
         this.joinDate = joinDate;
         this.isBanned = isBanned;
         this.roles = roles;
+        this.books = books;
     }
 
     public Long getId() {
@@ -70,5 +76,9 @@ public class UserResponseDTO {
 
     public Set<String> getRoles() {
         return roles;
+    }
+
+    public List<BookResponseDTO> getBooks() {
+        return books;
     }
 }
