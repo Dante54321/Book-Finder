@@ -25,7 +25,6 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    // CREATE BOOK
     @PostMapping("/books/create")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<BookResponseDTO> createBook(
@@ -34,7 +33,6 @@ public class BookController {
         return ResponseEntity.ok(bookService.createBook(dto));
     }
 
-    // GENERATE BOOK COVER UPLOAD URL
     @PostMapping("/books/{bookId}/cover/upload-url")
     public ResponseEntity<PresignedUploadResponseDTO> generateCoverUploadUrl(
             @PathVariable Long bookId,
@@ -45,31 +43,31 @@ public class BookController {
         return ResponseEntity.ok(responseDTO);
     }
 
-    // GENERATE BOOK COVER DOWNLOAD URL
     @GetMapping("/books/{bookId}/cover")
     public ResponseEntity<String> getCover(@PathVariable Long bookId) {
         return ResponseEntity.ok(bookService.getCoverUrl(bookId));
     }
 
-    // GET ALL BOOKS PUBLIC
     @GetMapping("/books/list")
     public ResponseEntity<Page<BookResponseDTO>> getAllBooks(Pageable pageable) {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
 
-    // GET BOOK DETAILS
+    @GetMapping("/books/top-rated")
+    public ResponseEntity<Page<BookResponseDTO>> getTopRatedBooks(Pageable pageable) {
+        return ResponseEntity.ok(bookService.getTopRatedBooks(pageable));
+    }
+
     @GetMapping("/books/{id}/details")
     public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookDetails(id));
     }
 
-    // GET ALL MY BOOKS
     @GetMapping("/books/me")
     public ResponseEntity<List<BookResponseDTO>> getMyBooks(Authentication authentication) {
         return ResponseEntity.ok(bookService.getMyBooks(authentication));
     }
 
-    // UPDATE BOOK
     @PutMapping("/books/{id}/update")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<BookResponseDTO> updateBook(
@@ -79,7 +77,6 @@ public class BookController {
         return ResponseEntity.ok(bookService.updateBook(id, dto));
     }
 
-    // DELETE BOOK
     @DeleteMapping("/books/{id}/delete")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
@@ -88,7 +85,6 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
-    // SEARCH FEATURE
     @PostMapping("/books/search")
     public Page<BookResponseDTO> searchBooks(
             @RequestBody SearchRequestDTO request) {

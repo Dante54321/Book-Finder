@@ -22,7 +22,6 @@ public interface BookRepository extends
         JpaRepository<Book, Long>,
         JpaSpecificationExecutor<Book> {
 
-    // Series Volume Logic
     @Query("""
         SELECT COALESCE(MAX(b.volumeNumber), 0)
         FROM Book b
@@ -38,7 +37,6 @@ public interface BookRepository extends
             Long currentBookId
     );
 
-    // Regular Queries
     List<Book> findByUser(User user);
 
     List<Book> findBySeries(Series series);
@@ -49,11 +47,9 @@ public interface BookRepository extends
 
     List<Book> findByUser_UserIdOrderByPublishDateDesc(Long userId);
 
-    // Specification Search Optimization
     @EntityGraph(attributePaths = {"user", "series"})
     Page<Book> findAll(Specification<Book> spec, Pageable pageable);
 
-    // PostgreSQL Full Text Search
     @Query(value = """
                 SELECT *,
                     ts_rank(
@@ -93,6 +89,26 @@ public interface BookRepository extends
     Optional<Book> findByBookIdAndPublicationStatus(Long bookId, PublicationStatus publicationStatus);
 
     List<Book> findByUser_UserIdAndSeriesIsNullOrderByPublishDateDesc(Long userId);
+
+    @Query(
+            value = """
+                SELECT b
+                FROM Book b
+                LEFT JOIN b.reviews r
+                WHERE b.publicationStatus = :status
+                GROUP BY b
+                ORDER BY COALESCE(AVG(r.rating), 0) DESC,
+                         COUNT(r) DESC,
+                         b.publishDate DESC
+            """,
+            countQuery = """
+                SELECT COUNT(b)
+                FROM Book b
+                WHERE b.publicationStatus = :status
+            """
+    )
+    Page<Book> findTopRatedBooks(
+            @Param("status") PublicationStatus status,
+            Pageable pageable
+    );
 }
-
-

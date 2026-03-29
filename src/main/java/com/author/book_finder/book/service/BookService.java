@@ -516,4 +516,10 @@ public class BookService {
         Book saved = bookRepository.save(book);
         return bookMapper.toResponseDTO(saved);
     }
+
+    public Page<BookResponseDTO> getTopRatedBooks(Pageable pageable) {
+        return bookRepository
+                .findTopRatedBooks(PublicationStatus.PUBLISHED, pageable)
+                .map(bookMapper::toResponseDTO);
+    }
 }

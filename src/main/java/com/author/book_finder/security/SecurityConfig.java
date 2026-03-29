@@ -57,6 +57,7 @@ public class SecurityConfig {
 
                                 // BROWSE BOOK (PUBLIC)
                                 .requestMatchers(HttpMethod.GET, "/api/books/list").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/books/top-rated").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/details").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/books/*/cover").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/books/search").permitAll()
