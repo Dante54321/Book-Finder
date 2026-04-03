@@ -2,6 +2,7 @@ package com.author.book_finder.review.service;
 
 import com.author.book_finder.book.entity.Book;
 import com.author.book_finder.book.repository.BookRepository;
+import com.author.book_finder.enums.PublicationStatus;
 import com.author.book_finder.review.dto.ReviewCreateRequestDTO;
 import com.author.book_finder.review.dto.ReviewResponseDTO;
 import com.author.book_finder.review.dto.ReviewSummaryDTO;
@@ -18,8 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.author.book_finder.enums.PublicationStatus;
 
 @Service
 public class ReviewService {
@@ -43,16 +42,25 @@ public class ReviewService {
 
     public ReviewResponseDTO createReview(Long bookId, ReviewCreateRequestDTO dto) {
         User currentUser = getCurrentUser();
-
         Book book = getPublishedBookOr404(bookId);
 
+        if (isBookOwnedByCurrentUser(book, currentUser)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You cannot review your own book"
+            );
+        }
+
         if (reviewRepository.existsByUserAndBook(currentUser, book)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You already reviewed this book");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "You already reviewed this book"
+            );
         }
 
         Review review = new Review();
         review.setRating(dto.getRating());
-        review.setComment(dto.getComment());
+        review.setComment(normalizeComment(dto.getComment()));
         review.setUser(currentUser);
         review.setBook(book);
 
@@ -68,7 +76,10 @@ public class ReviewService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
         if (!review.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update your own review");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You can only update your own review"
+            );
         }
 
         if (dto.getRating() != null) {
@@ -76,7 +87,7 @@ public class ReviewService {
         }
 
         if (dto.getComment() != null) {
-            review.setComment(dto.getComment());
+            review.setComment(normalizeComment(dto.getComment()));
         }
 
         Review updatedReview = reviewRepository.save(review);
@@ -91,7 +102,10 @@ public class ReviewService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
         if (!review.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own review");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You can only delete your own review"
+            );
         }
 
         reviewRepository.delete(review);
@@ -107,7 +121,6 @@ public class ReviewService {
 
     public ReviewResponseDTO getMyReviewForBook(Long bookId) {
         User currentUser = getCurrentUser();
-
         Book book = getPublishedBookOr404(bookId);
 
         Review review = reviewRepository.findByUserAndBook(currentUser, book)
@@ -146,5 +159,20 @@ public class ReviewService {
         return bookRepository
                 .findByBookIdAndPublicationStatus(bookId, PublicationStatus.PUBLISHED)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+    }
+
+    private boolean isBookOwnedByCurrentUser(Book book, User currentUser) {
+        return book.getUser() != null
+                && book.getUser().getUserId() != null
+                && book.getUser().getUserId().equals(currentUser.getUserId());
+    }
+
+    private String normalizeComment(String comment) {
+        if (comment == null) {
+            return null;
+        }
+
+        String trimmed = comment.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

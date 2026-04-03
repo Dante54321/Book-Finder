@@ -1,5 +1,7 @@
 package com.author.book_finder.review.dto;
 
+import java.time.LocalDateTime;
+
 public class ReviewResponseDTO {
 
     private Long reviewId;
@@ -8,6 +10,8 @@ public class ReviewResponseDTO {
     private Long bookId;
     private Long userId;
     private String username;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public ReviewResponseDTO() {
     }
@@ -58,5 +62,21 @@ public class ReviewResponseDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

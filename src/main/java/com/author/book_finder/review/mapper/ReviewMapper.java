@@ -16,6 +16,8 @@ public class ReviewMapper {
         dto.setReviewId(review.getReviewId());
         dto.setRating(review.getRating());
         dto.setComment(review.getComment());
+        dto.setCreatedAt(review.getCreatedAt());
+        dto.setUpdatedAt(review.getUpdatedAt());
 
         if (review.getBook() != null) {
             dto.setBookId(review.getBook().getBookId());

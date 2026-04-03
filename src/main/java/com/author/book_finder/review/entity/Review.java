@@ -5,6 +5,10 @@ import com.author.book_finder.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -26,6 +30,14 @@ public class Review {
 
     @Column(length = 2000)
     private String comment;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     //--------------------------
     // Many-to-One relationships
@@ -63,11 +75,11 @@ public class Review {
         return getClass().hashCode();
     }
 
-
     // Getters and Setters
     public Long getReviewId() {
         return reviewId;
     }
+
     public void setReviewId(Long reviewId) {
         this.reviewId = reviewId;
     }
@@ -75,6 +87,7 @@ public class Review {
     public int getRating() {
         return rating;
     }
+
     public void setRating(int rating) {
         this.rating = rating;
     }
@@ -82,13 +95,31 @@ public class Review {
     public String getComment() {
         return comment;
     }
+
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -96,6 +127,7 @@ public class Review {
     public Book getBook() {
         return book;
     }
+
     public void setBook(Book book) {
         this.book = book;
     }
@@ -106,6 +138,8 @@ public class Review {
                 "reviewId=" + reviewId +
                 ", rating=" + rating +
                 ", comment='" + comment + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 ", user=" + (user != null ? user.getUserId() : null) +
                 ", book=" + (book != null ? book.getBookId() : null) +
                 '}';
