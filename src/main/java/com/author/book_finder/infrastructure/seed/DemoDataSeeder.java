@@ -25,8 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -70,167 +69,277 @@ public class DemoDataSeeder implements CommandLineRunner {
             return;
         }
 
-        log.info("Starting demo data seed...");
+        log.info("Starting large demo data seed...");
 
         Role userRole = roleRepository.findByRoleName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found. Flyway role seed may not have run."));
+                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found."));
 
-        // ---- USERS ----
-        User author1 = createUser(
-                "luna.mercer",
-                "luna@bookfinder.demo",
-                "Luna",
-                "Mercer",
-                "Fantasy author who writes about fallen kingdoms and cursed crowns.",
-                userRole
+        List<AuthorSeed> authorSeeds = buildAuthorSeeds();
+
+        List<User> authors = new ArrayList<>();
+        List<Series> allSeries = new ArrayList<>();
+        List<Book> allBooks = new ArrayList<>();
+
+        // ----- AUTHORS + SERIES + BOOKS -----
+        int globalBookIndex = 0;
+
+        for (AuthorSeed seed : authorSeeds) {
+            User author = createUser(
+                    buildUsername(seed.firstName(), seed.lastName()),
+                    buildEmail(seed.firstName(), seed.lastName()),
+                    seed.firstName(),
+                    seed.lastName(),
+                    seed.bio(),
+                    userRole
+            );
+
+            authors.add(author);
+            userRepository.save(author);
+
+            Series series = null;
+            if (seed.seriesName() != null && !seed.seriesName().isBlank()) {
+                series = createSeries(
+                        author,
+                        seed.seriesName(),
+                        seed.seriesDescription(),
+                        LocalDate.of(2024, 1, 15).plusDays(globalBookIndex * 3L)
+                );
+                seriesRepository.save(series);
+                allSeries.add(series);
+            }
+
+            List<String> titles = seed.titles();
+            for (int i = 0; i < titles.size(); i++) {
+                boolean inSeries = series != null && i < 3;
+                Integer volumeNumber = inSeries ? i + 1 : null;
+
+                Book book = createBook(
+                        author,
+                        inSeries ? series : null,
+                        volumeNumber,
+                        titles.get(i),
+                        buildSummary(titles.get(i), seed.primaryGenre(), inSeries, seed.seriesName()),
+                        LocalDate.of(2024, 2, 1).plusDays(globalBookIndex * 9L),
+                        seed.genres(),
+                        buildTags(titles.get(i), seed.primaryGenre(), seed.seriesName())
+                );
+
+                allBooks.add(book);
+                globalBookIndex++;
+            }
+        }
+
+        bookRepository.saveAll(allBooks);
+
+        // ----- READERS -----
+        List<User> readers = List.of(
+                createUser("miareader", "miareader@bookfinder.demo", "Mia", "Reader",
+                        "Always looking for the next fantasy or romance obsession.", userRole),
+                createUser("noahreviews", "noahreviews@bookfinder.demo", "Noah", "Reviews",
+                        "Leaves detailed reviews on almost every book he reads.", userRole),
+                createUser("camilapages", "camilapages@bookfinder.demo", "Camila", "Pages",
+                        "Likes sci-fi, thrillers, and late-night reading marathons.", userRole),
+                createUser("ethanhart", "ethanhart@bookfinder.demo", "Ethan", "Hart",
+                        "Collects favorite quotes and follows top-rated books.", userRole),
+                createUser("sofiaturner", "sofiaturner@bookfinder.demo", "Sofia", "Turner",
+                        "Reads contemporary fiction, drama, and romance.", userRole),
+                createUser("lucasdale", "lucasdale@bookfinder.demo", "Lucas", "Dale",
+                        "Enjoys crime, mystery, and suspense series.", userRole),
+                createUser("arianawrites", "arianawrites@bookfinder.demo", "Ariana", "Writes",
+                        "Supports indie authors and reads across multiple genres.", userRole),
+                createUser("gabrielnorth", "gabrielnorth@bookfinder.demo", "Gabriel", "North",
+                        "Mostly reads dark fantasy, action, and dystopian stories.", userRole)
         );
 
-        User author2 = createUser(
-                "orion.vale",
-                "orion@bookfinder.demo",
-                "Orion",
-                "Vale",
-                "Sci-fi writer focused on neon cities, rogue signals, and broken futures.",
-                userRole
+        userRepository.saveAll(readers);
+
+        List<User> allUsers = new ArrayList<>();
+        allUsers.addAll(authors);
+        allUsers.addAll(readers);
+
+        // ----- REVIEWS -----
+        Random random = new Random(42);
+
+        for (Book book : allBooks) {
+            List<User> reviewers = new ArrayList<>(allUsers);
+            reviewers.removeIf(user -> user.getUserId().equals(book.getUser().getUserId()));
+            Collections.shuffle(reviewers, random);
+
+            int reviewCount = random.nextInt(6); // 0 to 5 reviews
+
+            for (int i = 0; i < Math.min(reviewCount, reviewers.size()); i++) {
+                User reviewer = reviewers.get(i);
+                int rating = weightedRating(random);
+
+                saveReview(
+                        reviewer,
+                        book,
+                        rating,
+                        buildReviewComment(book.getTitle(), rating, i)
+                );
+            }
+        }
+
+        log.info("Large demo data seeded successfully.");
+        log.info("Authors: {}", authors.size());
+        log.info("Readers: {}", readers.size());
+        log.info("Series: {}", allSeries.size());
+        log.info("Books: {}", allBooks.size());
+    }
+
+    private List<AuthorSeed> buildAuthorSeeds() {
+        return List.of(
+                new AuthorSeed(
+                        "Luna", "Mercer",
+                        "Fantasy author who writes about ruined kingdoms, ancient magic, and impossible oaths.",
+                        "Chronicles of Ember",
+                        "A dark fantasy saga about crowns, war, and the cost of power.",
+                        "Fantasy",
+                        List.of("Fantasy", "Dark Fantasy", "Adventure"),
+                        List.of(
+                                "Ashes of the First King",
+                                "Crown of Cinders",
+                                "The Ember Throne",
+                                "A Forest of Glass",
+                                "The Last Oathkeeper"
+                        )
+                ),
+                new AuthorSeed(
+                        "Orion", "Vale",
+                        "Sci-fi writer focused on surveillance cities, rogue signals, and collapsing systems.",
+                        "Neon City Files",
+                        "A cyberpunk thriller series set inside a city built on lies.",
+                        "Science Fiction",
+                        List.of("Science Fiction", "Cyberpunk", "Thriller"),
+                        List.of(
+                                "Signal in the Static",
+                                "Midnight Circuit",
+                                "Ghost Protocol Nine",
+                                "Glassline District",
+                                "The Last Firewall"
+                        )
+                ),
+                new AuthorSeed(
+                        "Ivy", "Marlow",
+                        "Writes emotional contemporary stories with romance, family tension, and sharp dialogue.",
+                        "",
+                        "",
+                        "Contemporary Fiction",
+                        List.of("Contemporary Fiction", "Drama", "Romance"),
+                        List.of(
+                                "The Last Lighthouse",
+                                "Velvet & Vows",
+                                "Summer After Snow",
+                                "Rooms We Left Behind",
+                                "The Weight of Almost"
+                        )
+                ),
+                new AuthorSeed(
+                        "Elias", "Thorne",
+                        "Mystery and suspense author with a taste for missing persons cases and hidden records.",
+                        "Black Harbor Cases",
+                        "A mystery series full of cold cases, false leads, and buried truths.",
+                        "Mystery",
+                        List.of("Mystery", "Crime", "Suspense"),
+                        List.of(
+                                "The Harbor File",
+                                "Whispers Under Mason Street",
+                                "Dead Letter Room",
+                                "The Eighth Witness",
+                                "A Trace in Winter"
+                        )
+                ),
+                new AuthorSeed(
+                        "Nora", "Bennett",
+                        "Young adult and dystopian author who likes rebellion, secrets, and found-family dynamics.",
+                        "After the Divide",
+                        "A dystopian series about survival after society fractures into isolated sectors.",
+                        "Dystopian",
+                        List.of("Dystopian", "Young Adult", "Action"),
+                        List.of(
+                                "After the Divide",
+                                "City of Broken Signals",
+                                "The Rebel Archive",
+                                "Dustline Run",
+                                "When the Grid Fell"
+                        )
+                ),
+                new AuthorSeed(
+                        "Jasper", "Cross",
+                        "Thriller writer with fast pacing, unreliable narrators, and dangerous secrets.",
+                        "",
+                        "",
+                        "Thriller",
+                        List.of("Thriller", "Suspense", "Crime"),
+                        List.of(
+                                "Seven Minutes to Midnight",
+                                "The Locked Floor",
+                                "A Name in Red Ink",
+                                "Behind the Safe Door",
+                                "The Silence Ledger"
+                        )
+                ),
+                new AuthorSeed(
+                        "Selene", "Hart",
+                        "Romance author who writes second chances, elegant chaos, and emotionally messy characters.",
+                        "Rosewood Hearts",
+                        "A romance series built around weddings, betrayals, and second chances.",
+                        "Romance",
+                        List.of("Romance", "Contemporary Fiction", "Drama"),
+                        List.of(
+                                "Rosewood Promises",
+                                "Gold Silk Evenings",
+                                "A Kiss at Bellview Hall",
+                                "The Language of Maybe",
+                                "Paper Rings and Rain"
+                        )
+                ),
+                new AuthorSeed(
+                        "Adrian", "Frost",
+                        "Horror and supernatural writer obsessed with empty towns, cursed places, and wrong turns.",
+                        "",
+                        "",
+                        "Horror",
+                        List.of("Horror", "Supernatural", "Thriller"),
+                        List.of(
+                                "The Hollow Parish",
+                                "When the Walls Breathed",
+                                "Blackwater House",
+                                "No One Leaves Briar Hill",
+                                "Midnight in Hollow Creek"
+                        )
+                ),
+                new AuthorSeed(
+                        "Clara", "Winslow",
+                        "Historical fiction author drawn to letters, war-time secrets, and quiet emotional stakes.",
+                        "",
+                        "",
+                        "Historical Fiction",
+                        List.of("Historical Fiction", "Drama", "Literary Fiction"),
+                        List.of(
+                                "The Cartographer's Daughter",
+                                "Letters from Alder Bay",
+                                "When April Burned",
+                                "The Orchard Between Us",
+                                "A Winter in Marseille"
+                        )
+                ),
+                new AuthorSeed(
+                        "Theo", "Rowan",
+                        "Adventure and urban fantasy writer mixing modern cities with hidden magical systems.",
+                        "Veilbound",
+                        "An urban fantasy series where old magic survives under modern skylines.",
+                        "Urban Fantasy",
+                        List.of("Urban Fantasy", "Adventure", "Action"),
+                        List.of(
+                                "Veilbound",
+                                "City of Sleeping Sigils",
+                                "The Iron Lantern",
+                                "Stormglass Alley",
+                                "The Atlas of Hidden Doors"
+                        )
+                )
         );
-
-        User author3 = createUser(
-                "ivy.marlow",
-                "ivy@bookfinder.demo",
-                "Ivy",
-                "Marlow",
-                "Writes emotional contemporary stories with romance and family tension.",
-                userRole
-        );
-
-        User reader1 = createUser(
-                "mia.reader",
-                "mia@bookfinder.demo",
-                "Mia",
-                "Reader",
-                "A passionate reader who loves fantasy and romance.",
-                userRole
-        );
-
-        User reader2 = createUser(
-                "noah.reviews",
-                "noah@bookfinder.demo",
-                "Noah",
-                "Reviews",
-                "Always leaving reviews and discovering new books.",
-                userRole
-        );
-
-        User reader3 = createUser(
-                "camila.pages",
-                "camila@bookfinder.demo",
-                "Camila",
-                "Pages",
-                "Loves thrillers, sci-fi, and binge-reading series.",
-                userRole
-        );
-
-        userRepository.saveAll(List.of(author1, author2, author3, reader1, reader2, reader3));
-
-        // ---- SERIES ----
-        Series emberSeries = createSeries(
-                author1,
-                "Chronicles of Ember",
-                "A dark fantasy series about a ruined crown, old magic, and a kingdom on the edge of collapse.",
-                LocalDate.of(2024, 2, 10)
-        );
-
-        Series neonSeries = createSeries(
-                author2,
-                "Neon City Files",
-                "A science fiction series set in a surveillance-heavy metropolis where every signal hides a secret.",
-                LocalDate.of(2024, 4, 5)
-        );
-
-        seriesRepository.saveAll(List.of(emberSeries, neonSeries));
-
-        // ---- BOOKS ----
-        Book book1 = createBook(
-                author1,
-                emberSeries,
-                "Ashes of the First King",
-                "When a forgotten heir discovers a ruined throne beneath the capital, old powers awaken and drag the kingdom toward war.",
-                LocalDate.of(2024, 3, 1),
-                List.of("Fantasy", "Dark Fantasy", "Adventure"),
-                List.of("kingdom", "magic", "crown", "war")
-        );
-
-        Book book2 = createBook(
-                author1,
-                emberSeries,
-                "Crown of Cinders",
-                "The throne has been claimed, but the deeper enemy sleeps beneath the city and feeds on every promise of power.",
-                LocalDate.of(2024, 8, 12),
-                List.of("Fantasy", "Dark Fantasy", "Action"),
-                List.of("sequel", "darkmagic", "betrayal", "throne")
-        );
-
-        Book book3 = createBook(
-                author2,
-                neonSeries,
-                "Signal in the Static",
-                "A data courier intercepts a forbidden transmission that exposes a conspiracy linking the city grid to vanished citizens.",
-                LocalDate.of(2024, 5, 9),
-                List.of("Science Fiction", "Cyberpunk", "Thriller"),
-                List.of("cyberpunk", "signal", "conspiracy", "future")
-        );
-
-        Book book4 = createBook(
-                author2,
-                neonSeries,
-                "Midnight Circuit",
-                "As the blackout spreads across the district, the people hunting the truth discover that the city was designed to lie.",
-                LocalDate.of(2024, 11, 3),
-                List.of("Science Fiction", "Cyberpunk", "Suspense"),
-                List.of("ai", "city", "surveillance", "blackout")
-        );
-
-        Book book5 = createBook(
-                author3,
-                null,
-                "The Last Lighthouse",
-                "A quiet coastal drama where two estranged siblings return home and confront the memories they tried to outrun.",
-                LocalDate.of(2024, 6, 21),
-                List.of("Drama", "Contemporary Fiction", "Literary Fiction"),
-                List.of("family", "coast", "grief", "homecoming")
-        );
-
-        Book book6 = createBook(
-                author3,
-                null,
-                "Velvet & Vows",
-                "A contemporary romance about ambition, second chances, and the wedding season that keeps throwing two rivals together.",
-                LocalDate.of(2025, 1, 14),
-                List.of("Romance", "Contemporary Fiction", "Young Adult"),
-                List.of("romance", "wedding", "rivals", "secondchance")
-        );
-
-        bookRepository.saveAll(List.of(book1, book2, book3, book4, book5, book6));
-
-        // ---- REVIEWS ----
-        saveReview(reader1, book1, 5, "Great worldbuilding and a really strong opening.");
-        saveReview(reader2, book1, 4, "Very solid fantasy setup. I would definitely read the sequel.");
-        saveReview(reader3, book1, 5, "My favorite demo book so far. Feels epic right away.");
-
-        saveReview(reader1, book2, 4, "Good sequel with higher stakes.");
-        saveReview(reader2, book2, 5, "Loved the darker tone and the pacing.");
-
-        saveReview(reader1, book3, 5, "Fast, stylish, and easy to imagine visually.");
-        saveReview(reader3, book3, 4, "The mystery and tech atmosphere were really good.");
-
-        saveReview(reader2, book4, 5, "This one feels like a strong cyberpunk thriller.");
-        saveReview(reader3, book4, 4, "Very cool premise and tension.");
-
-        saveReview(reader2, book5, 4, "More emotional and quiet, but very well written.");
-        saveReview(reader1, book6, 5, "Fun romance with strong chemistry.");
-        saveReview(reader3, book6, 4, "Easy read and very charming.");
-
-        log.info("Demo data seeded successfully.");
     }
 
     private User createUser(String username,
@@ -265,6 +374,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     private Book createBook(User author,
                             Series series,
+                            Integer volumeNumber,
                             String title,
                             String summary,
                             LocalDate publishDate,
@@ -275,6 +385,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         book.setSummary(summary);
         book.setPublishDate(publishDate);
         book.setPublicationStatus(PublicationStatus.PUBLISHED);
+        book.setVolumeNumber(volumeNumber);
 
         author.addBook(book);
 
@@ -289,10 +400,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void saveReview(User reviewer, Book book, int rating, String comment) {
-        if (reviewer.getUserId().equals(book.getUser().getUserId())) {
-            throw new IllegalStateException("Demo review cannot be created by the author of the book.");
-        }
-
         Review review = new Review();
         review.setRating(rating);
         review.setComment(comment);
@@ -314,9 +421,95 @@ public class DemoDataSeeder implements CommandLineRunner {
         return tagNames.stream()
                 .map(String::trim)
                 .map(String::toLowerCase)
+                .map(tag -> tag.replaceAll("[^a-z0-9]+", ""))
                 .filter(tag -> !tag.isBlank())
                 .map(tag -> hashtagRepository.findByHashtag(tag)
                         .orElseGet(() -> hashtagRepository.save(new Hashtag(tag))))
                 .collect(Collectors.toSet());
     }
+
+    private String buildUsername(String firstName, String lastName) {
+        return (firstName + lastName)
+                .replaceAll("[^A-Za-z0-9]", "")
+                .toLowerCase();
+    }
+
+    private String buildEmail(String firstName, String lastName) {
+        return buildUsername(firstName, lastName) + "@bookfinder.demo";
+    }
+
+    private String buildSummary(String title, String primaryGenre, boolean inSeries, String seriesName) {
+        if (inSeries && seriesName != null && !seriesName.isBlank()) {
+            return title + " is part of " + seriesName + ", a " + primaryGenre.toLowerCase() +
+                    " story filled with rising tension, layered characters, and a conflict that keeps expanding with every chapter.";
+        }
+
+        return title + " is a " + primaryGenre.toLowerCase() +
+                " novel that follows a character pushed into difficult choices, hidden truths, and a situation that keeps getting harder to escape.";
+    }
+
+    private List<String> buildTags(String title, String primaryGenre, String seriesName) {
+        List<String> tags = new ArrayList<>();
+
+        tags.add(primaryGenre.toLowerCase().replaceAll("[^a-z0-9]+", ""));
+        if (seriesName != null && !seriesName.isBlank()) {
+            tags.add(seriesName.toLowerCase().replaceAll("[^a-z0-9]+", ""));
+        }
+
+        String[] words = title.split("\\s+");
+        for (String word : words) {
+            String cleaned = word.toLowerCase().replaceAll("[^a-z0-9]+", "");
+            if (cleaned.length() >= 4) {
+                tags.add(cleaned);
+            }
+            if (tags.size() >= 4) {
+                break;
+            }
+        }
+
+        return tags.stream().distinct().toList();
+    }
+
+    private int weightedRating(Random random) {
+        int roll = random.nextInt(100);
+
+        if (roll < 10) return 2;
+        if (roll < 30) return 3;
+        if (roll < 65) return 4;
+        return 5;
+    }
+
+    private String buildReviewComment(String title, int rating, int variant) {
+        List<String> positive = List.of(
+                "Really enjoyed the pacing and atmosphere.",
+                "This one was easy to get into and hard to put down.",
+                "Strong concept and very readable from the start.",
+                "The characters and tone worked very well for me.",
+                "A very solid book with a strong hook."
+        );
+
+        List<String> mixed = List.of(
+                "Interesting idea, though I wanted a bit more depth in some parts.",
+                "Good overall, but some sections felt slower than others.",
+                "I liked the premise and would still recommend it.",
+                "Not perfect, but definitely engaging and worth reading."
+        );
+
+        if (rating >= 4) {
+            return title + ": " + positive.get(variant % positive.size());
+        }
+
+        return title + ": " + mixed.get(variant % mixed.size());
+    }
+
+    private record AuthorSeed(
+            String firstName,
+            String lastName,
+            String bio,
+            String seriesName,
+            String seriesDescription,
+            String primaryGenre,
+            List<String> genres,
+            List<String> titles
+    ) {}
 }
