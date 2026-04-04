@@ -29,4 +29,4 @@ aws:
 app:
   demo:
     seed:
-      enabled: ${APP_DEMO_SEED_ENABLED:false}
+      enabled: ${APP_DEMO_SEED_ENABLED:true}
