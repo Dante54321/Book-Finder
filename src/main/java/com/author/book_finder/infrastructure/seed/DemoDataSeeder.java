@@ -80,9 +80,9 @@ public class DemoDataSeeder implements CommandLineRunner {
         List<Series> allSeries = new ArrayList<>();
         List<Book> allBooks = new ArrayList<>();
 
-        // ----- AUTHORS + SERIES + BOOKS -----
         int globalBookIndex = 0;
 
+        // ----- AUTHORS + SERIES + BOOKS -----
         for (AuthorSeed seed : authorSeeds) {
             User author = createUser(
                     buildUsername(seed.firstName(), seed.lastName()),
@@ -133,21 +133,21 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         // ----- READERS -----
         List<User> readers = List.of(
-                createUser("miareader", "miareader@bookfinder.demo", "Mia", "Reader",
+                createUser("Mia Reader", "miareader@bookfinder.demo", "Mia", "Reader",
                         "Always looking for the next fantasy or romance obsession.", userRole),
-                createUser("noahreviews", "noahreviews@bookfinder.demo", "Noah", "Reviews",
+                createUser("Noah Reviews", "noahreviews@bookfinder.demo", "Noah", "Reviews",
                         "Leaves detailed reviews on almost every book he reads.", userRole),
-                createUser("camilapages", "camilapages@bookfinder.demo", "Camila", "Pages",
+                createUser("Camila Pages", "camilapages@bookfinder.demo", "Camila", "Pages",
                         "Likes sci-fi, thrillers, and late-night reading marathons.", userRole),
-                createUser("ethanhart", "ethanhart@bookfinder.demo", "Ethan", "Hart",
+                createUser("Ethan Hart", "ethanhart@bookfinder.demo", "Ethan", "Hart",
                         "Collects favorite quotes and follows top-rated books.", userRole),
-                createUser("sofiaturner", "sofiaturner@bookfinder.demo", "Sofia", "Turner",
+                createUser("Sofia Turner", "sofiaturner@bookfinder.demo", "Sofia", "Turner",
                         "Reads contemporary fiction, drama, and romance.", userRole),
-                createUser("lucasdale", "lucasdale@bookfinder.demo", "Lucas", "Dale",
+                createUser("Lucas Dale", "lucasdale@bookfinder.demo", "Lucas", "Dale",
                         "Enjoys crime, mystery, and suspense series.", userRole),
-                createUser("arianawrites", "arianawrites@bookfinder.demo", "Ariana", "Writes",
+                createUser("Ariana Writes", "arianawrites@bookfinder.demo", "Ariana", "Writes",
                         "Supports indie authors and reads across multiple genres.", userRole),
-                createUser("gabrielnorth", "gabrielnorth@bookfinder.demo", "Gabriel", "North",
+                createUser("Gabriel North", "gabrielnorth@bookfinder.demo", "Gabriel", "North",
                         "Mostly reads dark fantasy, action, and dystopian stories.", userRole)
         );
 
@@ -429,13 +429,16 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private String buildUsername(String firstName, String lastName) {
-        return (firstName + lastName)
-                .replaceAll("[^A-Za-z0-9]", "")
-                .toLowerCase();
+        return (firstName.trim() + " " + lastName.trim())
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private String buildEmail(String firstName, String lastName) {
-        return buildUsername(firstName, lastName) + "@bookfinder.demo";
+        String safe = (firstName + lastName)
+                .replaceAll("[^A-Za-z0-9]", "")
+                .toLowerCase();
+        return safe + "@bookfinder.demo";
     }
 
     private String buildSummary(String title, String primaryGenre, boolean inSeries, String seriesName) {
